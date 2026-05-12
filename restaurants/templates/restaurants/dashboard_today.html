@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="receipt">
+  <div class="receipt-inner">
+    <h1 class="text-2xl font-bold text-seated-ink">{{ restaurant.name }}</h1>
+    <p class="mt-1 text-sm text-seated-ink-mid">Today — {{ today|date:"l j F Y" }}</p>
+    <div class="mt-4 space-y-1 text-sm text-seated-ink-mid">
+      {% for s in summaries %}
+      <p><span class="font-bold text-seated-ink">{{ s.service.name|upper }}</span> · {{ s.booked }} booked / {{ s.remaining }} remain</p>
+      {% empty %}
+      <p class="text-seated-ink-light">No active services.</p>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="tear"></div>
+  <div class="receipt-inner receipt-cream">
+    <p class="mb-3 text-[10px] font-bold uppercase tracking-section text-seated-ink-light">Today's bookings</p>
+    <div class="space-y-3">
+      {% for booking in bookings %}
+      <div class="border-b border-dashed border-seated-rule pb-3">
+        <p class="font-bold text-seated-ink">{{ booking.time|time:"H:i" }} {{ booking.guest_name }} × {{ booking.party_size }}</p>
+        <p class="text-sm text-seated-ink-mid">{{ booking.table.label|default:"Unassigned" }}{% if booking.notes %} · {{ booking.notes }}{% endif %}</p>
+        <p class="mb-2 text-xs uppercase tracking-navlink text-seated-ink-light">{{ booking.status }}</p>
+        <div class="flex flex-wrap gap-2">
+          <form method="post" action="{% url 'restaurants:booking_status' booking.id 'no_show' %}">{% csrf_token %}<button class="btn-row" type="submit">No-show</button></form>
+          <form method="post" action="{% url 'restaurants:booking_status' booking.id 'cancel' %}">{% csrf_token %}<button class="btn-row" type="submit">Cancel</button></form>
+          <form method="post" action="{% url 'restaurants:booking_status' booking.id 'complete' %}">{% csrf_token %}<button class="btn-row" type="submit">Completed</button></form>
+          <a class="btn-row inline-block no-underline" href="{% url 'restaurants:booking_detail' booking.id %}">Details</a>
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-seated-ink-light">No bookings today.</p>
+      {% endfor %}
+    </div>
+    <a href="/book/{{ restaurant.slug }}/" class="btn-primary mt-6 inline-block">+ Add booking</a>
+  </div>
+</section>
+{% endblock %}

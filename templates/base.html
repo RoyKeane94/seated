@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Seated{% endblock %}</title>
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/seated.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen bg-seated-bg bg-page-texture font-mono text-seated-ink antialiased {% block body_extra_class %}{% endblock %}">
+  {% if not embedded %}
+  {% block nav %}
+  <nav class="sticky top-0 z-[100] flex w-full flex-wrap items-center justify-between gap-4 border-b-2 border-seated-ink bg-seated-paper px-6 py-5 md:px-14">
+    <a href="/" class="font-mono text-[15px] font-bold tracking-[0.14em] text-seated-ink no-underline">SEATED<span class="text-seated-blue-mid">.</span></a>
+    <ul class="flex list-none flex-wrap items-center gap-4 md:gap-9">
+      {% if request.user.is_authenticated %}
+      <li><a href="/dashboard/" class="text-[11px] uppercase tracking-navlink text-seated-ink-light no-underline transition-colors hover:text-seated-ink">Dashboard</a></li>
+      <li><a href="/dashboard/settings/" class="text-[11px] uppercase tracking-navlink text-seated-ink-light no-underline transition-colors hover:text-seated-ink">Settings</a></li>
+      <li><a href="/logout/" class="text-[11px] uppercase tracking-navlink text-seated-ink-light no-underline transition-colors hover:text-seated-ink">Logout</a></li>
+      {% else %}
+      <li><a href="/login/" class="text-[11px] uppercase tracking-navlink text-seated-ink-light no-underline transition-colors hover:text-seated-ink">Login</a></li>
+      <li>
+        <a href="/signup/" class="inline-block bg-seated-blue px-[22px] py-2.5 text-[11px] font-bold uppercase tracking-[0.08em] text-white no-underline transition-colors hover:bg-seated-blue-mid">Get started</a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endblock %}
+  {% endif %}
+  {% block content %}{% endblock %}
+</body>
+</html>

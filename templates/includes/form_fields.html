@@ -1,0 +1,27 @@
+{# Seated: stack fields with till-roll labels (use with <form class="form-stack">) #}
+{% if form.non_field_errors %}
+<div class="mb-4 border border-seated-rule-dark bg-seated-cream px-3 py-2 text-sm text-seated-ink">
+  {{ form.non_field_errors }}
+</div>
+{% endif %}
+{% for field in form %}
+  {% if field.is_hidden %}
+    {{ field }}
+  {% elif field.field.widget.input_type == 'checkbox' %}
+    <div class="form-field mb-4">
+      <div class="flex items-start gap-2">
+        {{ field }}
+        <label class="text-sm font-normal leading-snug text-seated-ink-mid" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      </div>
+      {% if field.help_text %}<p class="helptext ml-7">{{ field.help_text }}</p>{% endif %}
+      {% if field.errors %}{{ field.errors }}{% endif %}
+    </div>
+  {% else %}
+    <div class="form-field mb-4">
+      <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink-light" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}<p class="helptext">{{ field.help_text }}</p>{% endif %}
+      {% if field.errors %}{{ field.errors }}{% endif %}
+    </div>
+  {% endif %}
+{% endfor %}

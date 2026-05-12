@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="receipt">
+  <div class="receipt-inner">
+    <h1 class="text-2xl font-bold text-seated-ink">Upcoming 14 days</h1>
+    <p class="mt-1 text-sm text-seated-ink-light">{{ restaurant.name }}</p>
+    <hr class="my-6 border-0 border-t border-seated-rule" />
+    {% for day, bookings in grouped_bookings.items %}
+    <div class="mb-8 last:mb-0">
+      <h2 class="border-b-2 border-seated-ink pb-1 text-xs font-bold uppercase tracking-section text-seated-ink">{{ day|date:"l j F Y" }}</h2>
+      <ul class="mt-2 list-none space-y-2 p-0">
+        {% for booking in bookings %}
+        <li class="flex flex-wrap items-baseline gap-x-2 border-b border-seated-rule py-2 text-sm text-seated-ink-mid last:border-0">
+          <span class="font-mono font-bold text-seated-ink">{{ booking.time|time:"H:i" }}</span>
+          <span>{{ booking.guest_name }}</span>
+          <span class="text-seated-ink-light">×{{ booking.party_size }}</span>
+          {% if booking.status != 'confirmed' %}<span class="text-[10px] uppercase text-seated-ink-light">{{ booking.status }}</span>{% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% empty %}
+    <p class="text-seated-ink-light">No upcoming bookings.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

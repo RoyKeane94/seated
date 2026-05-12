@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block title %}Setup step 2 - Seated{% endblock %}
+{% block content %}
+<section class="receipt">
+  <div class="receipt-inner">
+    <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-seated-ink-light">Step {{ step }} of 4</p>
+    <h1 class="mt-2 text-2xl font-bold text-seated-ink">Your tables</h1>
+    <p class="mt-2 text-sm text-seated-ink-mid">Set how many tables and seat counts you have.</p>
+    <hr class="my-6 border-0 border-t border-seated-rule" />
+    <form method="post" id="tables-form" class="form-stack">
+      {% csrf_token %}
+      {{ form.tables_json }}
+      <div class="form-field mb-4">
+        <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink-light" id="table-count-label">Number of tables</span>
+        <div id="table-count-wrap" class="seated-dropdown" aria-labelledby="table-count-label"></div>
+      </div>
+      <div id="table-rows" class="space-y-3"></div>
+      <div class="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-seated-rule pt-6">
+        <a href="{% url 'accounts:onboarding_step1' %}" class="text-[11px] font-bold uppercase tracking-navlink text-seated-ink-light no-underline transition-colors hover:text-seated-ink">← Back</a>
+        <button class="btn-primary" type="submit">Next: services</button>
+      </div>
+    </form>
+  </div>
+</section>
+<script>
+(() => {
+  const CHEVRON =
+    '<span class="pointer-events-none shrink-0 text-seated-ink-light" aria-hidden="true">' +
+    '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">' +
+    '<path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M3.5 5.25 7 8.75l3.5-3.5"/></svg></span>';
+
+  function closeAllSeatedDropdowns(exceptEl) {
+    document.querySelectorAll(".seated-dropdown.is-open").forEach((el) => {
+      if (el !== exceptEl) el.classList.remove("is-open");
+    });
+  }
+
+  document.addEventListener("click", () => closeAllSeatedDropdowns(null));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeAllSeatedDropdowns(null);
+  });
+
+  function normalizeItems(options) {
+    return options.map((o) =>
+      typeof o === "object" && o !== null && "value" in o
+        ? { value: String(o.value), label: String(o.label ?? o.value) }
+        : { value: String(o), label: String(o) }
+    );
+  }
+
+  /**
+   * @param {"number"|"string"} valueKind
+   */
+  function mountSeatedDropdown(host, optionsSpec, initial, onChange, valueKind = "number") {
+    const items = normalizeItems(optionsSpec);
+    let initialStr = String(initial);
+    if (!items.some((i) => i.value === initialStr)) initialStr = items[0].value;
+    let current = initialStr;
+
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "seated-dropdown-trigger";
+    trigger.setAttribute("aria-haspopup", "listbox");
+    trigger.setAttribute("aria-expanded", "false");
+
+    const panel = document.createElement("ul");
+    panel.className = "seated-dropdown-panel";
+    panel.setAttribute("role", "listbox");
+
+    function labelFor(val) {
+      const it = items.find((i) => i.value === val);
+      return it ? it.label : val;
+    }
+
+    function syncPanelActive() {
+      panel.querySelectorAll(".seated-dropdown-option").forEach((li) => {
+        li.classList.toggle("is-active", li.dataset.val === current);
+      });
+    }
+
+    function renderTrigger() {
+      trigger.innerHTML = `<span>${labelFor(current)}</span>${CHEVRON}`;
+    }
+
+    function emitChange() {
+      const v = valueKind === "number" ? Number(current) : current;
+      onChange(v);
+    }
+
+    function renderPanel() {
+      panel.innerHTML = items
+        .map(
+          (it) =>
+            `<li role="option" class="seated-dropdown-option" data-val="${it.value}" tabindex="-1">${it.label}</li>`
+        )
+        .join("");
+      panel.querySelectorAll(".seated-dropdown-option").forEach((li) => {
+        li.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          current = li.dataset.val;
+          renderTrigger();
+          syncPanelActive();
+          host.classList.remove("is-open");
+          trigger.setAttribute("aria-expanded", "false");
+          emitChange();
+        });
+      });
+      syncPanelActive();
+    }
+
+    renderTrigger();
+    renderPanel();
+
+    trigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const opening = !host.classList.contains("is-open");
+      closeAllSeatedDropdowns(host);
+      host.classList.toggle("is-open", opening);
+      trigger.setAttribute("aria-expanded", opening ? "true" : "false");
+    });
+
+    panel.addEventListener("click", (e) => e.stopPropagation());
+
+    host.appendChild(trigger);
+    host.appendChild(panel);
+
+    return {
+      getValue: () => (valueKind === "number" ? Number(current) : current),
+      setValue: (v) => {
+        const s = String(v);
+        if (items.some((i) => i.value === s)) current = s;
+        renderTrigger();
+        syncPanelActive();
+      },
+    };
+  }
+
+  const countWrap = document.getElementById("table-count-wrap");
+  const rows = document.getElementById("table-rows");
+  const jsonField = document.querySelector("input[name='tables_json']");
+  let rawInitial = [];
+  try {
+    rawInitial = JSON.parse(jsonField.value || "[]");
+  } catch (e) {
+    rawInitial = [];
+  }
+  if (!Array.isArray(rawInitial)) rawInitial = [];
+
+  let rowState = rawInitial.map((it) => ({
+    label: String(it.label ?? ""),
+    seats: Number(it.seats) || 4,
+    is_combinable: !!it.is_combinable,
+  }));
+
+  const tableCountValues = [{% for n in table_count_options %}{{ n }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  const seatValues = Array.from({ length: 12 }, (_, n) => n + 1);
+
+  let countDropdown = null;
+
+  function snapshotFromDom() {
+    return [...rows.children].map((row) => ({
+      label: row.querySelector(".table-label").value,
+      seats: row._seatsDd.getValue(),
+      is_combinable: row.querySelector(".table-combinable").checked,
+    }));
+  }
+
+  function renderRows() {
+    if (rows.children.length) rowState = snapshotFromDom();
+    const count = countDropdown.getValue();
+    while (rowState.length < count) {
+      rowState.push({
+        label: `Table ${rowState.length + 1}`,
+        seats: 4,
+        is_combinable: false,
+      });
+    }
+    rowState = rowState.slice(0, count);
+
+    rows.innerHTML = "";
+    for (let i = 0; i < count; i++) {
+      const existing = rowState[i];
+
+      const row = document.createElement("div");
+      row.className = "border border-seated-rule-dark bg-white p-3";
+      row.innerHTML = `
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div class="form-field">
+            <label class="mb-1 block text-[10px] font-bold uppercase tracking-wider text-seated-ink-light">Label</label>
+            <input class="input table-label" value="" />
+          </div>
+          <div class="form-field">
+            <span class="mb-1 block text-[10px] font-bold uppercase tracking-wider text-seated-ink-light">Seats</span>
+            <div class="seated-dropdown table-seats-dd"></div>
+          </div>
+        </div>
+        <label class="mt-2 flex cursor-pointer items-center gap-2 text-sm text-seated-ink-mid">
+          <input type="checkbox" class="size-4 accent-[#1B3A6B] table-combinable" /> Can be combined
+        </label>
+      `;
+      row.querySelector(".table-label").value = existing.label;
+
+      const ddHost = row.querySelector(".table-seats-dd");
+      row._seatsDd = mountSeatedDropdown(ddHost, seatValues, existing.seats, () => {}, "number");
+
+      row.querySelector(".table-combinable").checked = !!existing.is_combinable;
+      rows.appendChild(row);
+    }
+  }
+
+  countDropdown = mountSeatedDropdown(
+    countWrap,
+    tableCountValues,
+    rawInitial.length ? rawInitial.length : 6,
+    () => renderRows(),
+    "number"
+  );
+
+  document.getElementById("tables-form").addEventListener("submit", () => {
+    rowState = snapshotFromDom();
+    const payload = rowState.map((r, idx) => ({
+      local_id: `t${idx + 1}`,
+      label: r.label,
+      seats: r.seats,
+      is_combinable: r.is_combinable,
+      combine_with: [],
+    }));
+    jsonField.value = JSON.stringify(payload);
+  });
+
+  renderRows();
+})();
+</script>
+{% endblock %}

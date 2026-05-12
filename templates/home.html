@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+
+{% block title %}Seated — Booking software for independent restaurants{% endblock %}
+
+{% block nav %}
+<nav class="sticky top-0 z-[100] flex w-full items-center justify-between border-b-2 border-seated-ink bg-seated-paper px-6 py-5 md:px-14">
+  <a href="/" class="font-mono text-[15px] font-bold tracking-[0.14em] text-seated-ink no-underline">SEATED<span class="text-seated-blue-mid">.</span></a>
+  <ul class="flex list-none items-center gap-6 md:gap-9">
+    <li><a href="#how" class="text-[11px] uppercase tracking-navlink text-seated-ink-light no-underline transition-colors hover:text-seated-ink">How it works</a></li>
+    <li><a href="#pricing" class="text-[11px] uppercase tracking-navlink text-seated-ink-light no-underline transition-colors hover:text-seated-ink">Pricing</a></li>
+    {% if request.user.is_authenticated %}
+    <li><a href="/dashboard/" class="text-[11px] uppercase tracking-navlink text-seated-ink-light no-underline transition-colors hover:text-seated-ink">Dashboard</a></li>
+    {% else %}
+    <li>
+      <a href="/signup/" class="inline-block bg-seated-blue px-[22px] py-2.5 text-[11px] font-bold uppercase tracking-[0.08em] text-white no-underline transition-colors hover:bg-seated-blue-mid">Get started</a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endblock %}
+
+{% block content %}
+
+{# —— Hero receipt —— #}
+<div class="lp-receipt">
+  <div class="relative z-[1] mx-auto max-w-content px-10">
+    <div class="mb-7 text-center">
+      <div class="mb-1.5 text-[30px] font-bold tracking-store text-seated-ink">SEATED</div>
+      <div class="mb-1 font-serif text-xs italic tracking-[0.08em] text-seated-ink-light">Booking software for independent restaurants</div>
+      <div class="text-center text-[10px] tracking-[0.06em] text-seated-blue-light">seated.co</div>
+    </div>
+
+    <hr class="my-5 border-0 border-t-[3px] border-double border-seated-rule-dark" />
+
+    <div class="mb-5">
+      <div class="mb-1 flex justify-between text-[11px] tracking-[0.04em] text-seated-ink-light">
+        <span>FOR</span><strong class="font-normal text-seated-ink-mid">Independent restaurants</strong>
+      </div>
+      <div class="mb-1 flex justify-between text-[11px] tracking-[0.04em] text-seated-ink-light">
+        <span>DATE</span><strong class="font-normal text-seated-ink-mid">Any day you're open</strong>
+      </div>
+      <div class="flex justify-between text-[11px] tracking-[0.04em] text-seated-ink-light">
+        <span>REF</span><strong class="font-normal text-seated-ink-mid">#SORTED-001</strong>
+      </div>
+    </div>
+
+    <hr class="my-5 border-0 border-t border-seated-rule" />
+    <div class="py-1 text-center text-[10px] uppercase tracking-section text-seated-ink-light">Your order</div>
+    <hr class="my-5 border-0 border-t border-seated-rule" />
+
+    <div>
+      <div class="lp-item flex items-baseline justify-between border-b border-seated-rule py-[9px] text-[13px] last:border-b-0">
+        <span class="tracking-[0.02em] text-seated-ink-mid">BOOKING LINK</span>
+        <span class="font-bold text-seated-blue">£50.00 / month</span>
+      </div>
+      <div class="lp-item flex items-baseline justify-between border-b border-seated-rule py-[9px] text-[13px] last:border-b-0">
+        <span class="tracking-[0.02em] text-seated-ink-mid">EMBEDDED WIDGET</span>
+        <span class="font-bold text-seated-blue">£60.00 / month</span>
+      </div>
+      <div class="lp-item flex items-baseline justify-between border-b border-seated-rule py-[9px] text-[13px] last:border-b-0">
+        <span class="tracking-[0.02em] text-seated-ink-mid">COMMISSION</span>
+        <span class="font-bold italic text-seated-blue-mid">£0.00</span>
+      </div>
+      <div class="lp-item flex items-baseline justify-between border-b border-seated-rule py-[9px] text-[13px] last:border-b-0">
+        <span class="tracking-[0.02em] text-seated-ink-mid">PER-COVER FEE</span>
+        <span class="font-bold italic text-seated-blue-mid">£0.00</span>
+      </div>
+      <div class="lp-item flex items-baseline justify-between border-b border-seated-rule py-[9px] text-[13px] last:border-b-0">
+        <span class="tracking-[0.02em] text-seated-ink-mid">CONTRACT</span>
+        <span class="font-bold italic text-seated-blue-mid">NONE</span>
+      </div>
+      <div class="lp-item flex items-baseline justify-between border-b border-seated-rule py-[9px] text-[13px] last:border-b-0">
+        <span class="tracking-[0.02em] text-seated-ink-mid">SETUP FEE</span>
+        <span class="font-bold italic text-seated-blue-mid">NONE</span>
+      </div>
+      <div class="lp-item flex items-baseline justify-between border-b border-seated-rule py-[9px] text-[13px] last:border-b-0">
+        <span class="tracking-[0.02em] text-seated-ink-mid">HIDDEN FEES</span>
+        <span class="font-bold italic text-seated-blue-mid">NONE</span>
+      </div>
+      <div class="lp-item flex items-baseline justify-between border-b border-seated-rule py-[9px] text-[13px] last:border-b-0">
+        <span class="tracking-[0.02em] text-seated-ink-mid">FEATURES YOU'LL NEVER USE</span>
+        <span class="font-bold italic text-seated-blue-mid">NONE</span>
+      </div>
+    </div>
+
+    <hr class="my-5 border-0 border-t-2 border-seated-ink" />
+
+    <div class="flex items-baseline justify-between pb-2 pt-3.5">
+      <span class="text-[13px] font-bold tracking-[0.06em]">SAVING VS SEVENROOMS</span>
+      <span class="text-2xl font-bold text-seated-blue">£<span id="counter">0</span>/mo</span>
+    </div>
+    <p class="mt-0.5 text-right font-serif text-[11px] italic text-seated-blue-mid">* vs SevenRooms standard plan at ~£370/month</p>
+
+    <hr class="my-5 border-0 border-t-[3px] border-double border-seated-rule-dark" />
+
+    <div class="pb-1 pt-8 text-center">
+      <a href="/signup/" class="lp-cta-hero inline-block bg-seated-blue px-12 py-[18px] font-mono text-xs font-bold uppercase tracking-[0.1em] text-white no-underline transition-colors hover:bg-seated-blue-mid">Get your booking link</a>
+      <p class="lp-tagline-cta mx-auto mt-4 max-w-md font-serif text-xs italic leading-relaxed text-seated-ink-light">
+        We take care of the bookings.<br />
+        You take care of everything else.
+      </p>
+      <p class="lp-fine-hero mt-2 text-[10px] tracking-[0.07em] text-seated-rule-dark">&nbsp;</p>
+    </div>
+  </div>
+</div>
+
+{# —— Perforated tear —— #}
+<div class="relative flex h-[18px] w-full items-center overflow-hidden bg-seated-bg">
+  <div class="absolute left-0 right-0 top-1/2 border-t border-dashed border-seated-rule-dark"></div>
+  <div class="relative z-[1] flex w-full justify-between px-3">
+    {% for i in "xxxxxxxxxxxxxxxxxxxx" %}
+    <div class="size-2.5 shrink-0 rounded-full border border-seated-rule-dark bg-seated-bg"></div>
+    {% endfor %}
+  </div>
+</div>
+
+{# —— How it works —— #}
+<div class="lp-receipt lp-fade-in" id="how">
+  <div class="relative z-[1] mx-auto max-w-content px-10">
+    <div class="mb-6 text-center">
+      <h3 class="mb-1 text-xs font-bold uppercase tracking-section text-seated-ink">How It Works</h3>
+      <p class="font-serif text-xs italic text-seated-ink-light">Live in ten minutes. No developer required.</p>
+    </div>
+
+    <hr class="my-5 border-0 border-t border-seated-rule" />
+
+    <div id="steps-block">
+      <div class="lp-step-block mb-7 last:mb-0">
+        <div class="step-num mb-1.5 text-[10px] uppercase tracking-[0.18em] text-seated-blue-light">01 / 04</div>
+        <div class="mb-1.5 text-[13px] font-bold tracking-[0.04em] text-seated-ink">TELL US ABOUT YOUR RESTAURANT</div>
+        <p class="font-serif text-xs leading-loose text-seated-ink-light">Tables, seat counts, services you run, how long you turn covers. Five questions. Two minutes at the most.</p>
+      </div>
+      <hr class="my-5 border-0 border-t border-dashed border-seated-rule" />
+      <div class="lp-step-block mb-7 last:mb-0">
+        <div class="step-num mb-1.5 text-[10px] uppercase tracking-[0.18em] text-seated-blue-light">02 / 04</div>
+        <div class="mb-1.5 text-[13px] font-bold tracking-[0.04em] text-seated-ink">RECEIVE YOUR BOOKING LINK</div>
+        <p class="font-serif text-xs leading-loose text-seated-ink-light">A clean branded page at seated.co/your-restaurant. Paste it anywhere — your website, Instagram bio, Google Business, email footer.</p>
+      </div>
+      <hr class="my-5 border-0 border-t border-dashed border-seated-rule" />
+      <div class="lp-step-block mb-7 last:mb-0">
+        <div class="step-num mb-1.5 text-[10px] uppercase tracking-[0.18em] text-seated-blue-light">03 / 04</div>
+        <div class="mb-1.5 text-[13px] font-bold tracking-[0.04em] text-seated-ink">OPTIONALLY: EMBED THE WIDGET</div>
+        <p class="font-serif text-xs leading-loose text-seated-ink-light">Paste one line of code into your website. The booking form appears in-page. Guests never have to leave your site.</p>
+      </div>
+      <hr class="my-5 border-0 border-t border-dashed border-seated-rule" />
+      <div class="lp-step-block mb-0">
+        <div class="step-num mb-1.5 text-[10px] uppercase tracking-[0.18em] text-seated-blue-light">04 / 04</div>
+        <div class="mb-1.5 text-[13px] font-bold tracking-[0.04em] text-seated-ink">GO RUN YOUR RESTAURANT</div>
+        <p class="font-serif text-xs leading-loose text-seated-ink-light">Guests receive a confirmation and a 24-hour reminder automatically. You get a notification. That is genuinely it.</p>
+      </div>
+    </div>
+
+    <hr class="my-5 border-0 border-t border-seated-rule" />
+
+    <div class="text-right text-[10px] tracking-[0.06em] text-seated-ink-light">
+      SETUP TIME: ~10 MIN &nbsp;·&nbsp; ONGOING ADMIN: ~0 MIN
+    </div>
+  </div>
+</div>
+
+<div class="relative flex h-[18px] w-full items-center overflow-hidden bg-seated-bg">
+  <div class="absolute left-0 right-0 top-1/2 border-t border-dashed border-seated-rule-dark"></div>
+  <div class="relative z-[1] flex w-full justify-between px-3">
+    {% for i in "xxxxxxxxxxxxxxxxxxxx" %}
+    <div class="size-2.5 shrink-0 rounded-full border border-seated-rule-dark bg-seated-bg"></div>
+    {% endfor %}
+  </div>
+</div>
+
+{# —— Pricing —— #}
+<div class="lp-receipt lp-fade-in" id="pricing">
+  <div class="relative z-[1] mx-auto max-w-content px-10">
+    <div class="mb-6 text-center">
+      <h3 class="mb-1 text-xs font-bold uppercase tracking-section text-seated-ink">Pricing</h3>
+      <p class="font-serif text-xs italic text-seated-ink-light">Two plans. Both honest. Same price every month.</p>
+    </div>
+
+    <hr class="my-5 border-0 border-t border-seated-rule" />
+
+    <div class="mt-1 grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-6">
+      <div class="border border-seated-rule-dark p-8 transition-colors hover:border-seated-blue-mid">
+        <div class="mb-[18px] text-[10px] uppercase tracking-[0.16em] text-seated-blue-mid">Booking Link</div>
+        <div class="mb-1 text-[52px] font-bold leading-none text-seated-ink"><sup class="font-inherit align-top text-[22px] leading-none">£</sup>50</div>
+        <div class="mb-[22px] text-[10px] tracking-[0.06em] text-seated-ink-light">PER MONTH · NO CONTRACT</div>
+        <ul class="flex list-none flex-col gap-2.5">
+          <li class="flex gap-2 font-serif text-xs leading-normal text-seated-ink-mid before:shrink-0 before:text-seated-blue-light before:content-['—']">Hosted booking page</li>
+          <li class="flex gap-2 font-serif text-xs leading-normal text-seated-ink-mid before:shrink-0 before:text-seated-blue-light before:content-['—']">Your branding and colours</li>
+          <li class="flex gap-2 font-serif text-xs leading-normal text-seated-ink-mid before:shrink-0 before:text-seated-blue-light before:content-['—']">Table availability logic</li>
+          <li class="flex gap-2 font-serif text-xs leading-normal text-seated-ink-mid before:shrink-0 before:text-seated-blue-light before:content-['—']">Confirmation emails</li>
+          <li class="flex gap-2 font-serif text-xs leading-normal text-seated-ink-mid before:shrink-0 before:text-seated-blue-light before:content-['—']">24-hour reminder emails</li>
+          <li class="flex gap-2 font-serif text-xs leading-normal text-seated-ink-mid before:shrink-0 before:text-seated-blue-light before:content-['—']">Today's bookings view</li>
+          <li class="flex gap-2 font-serif text-xs leading-normal text-seated-ink-mid before:shrink-0 before:text-seated-blue-light before:content-['—']">Phone booking log</li>
+          <li class="flex gap-2 font-serif text-xs leading-normal text-seated-ink-mid before:shrink-0 before:text-seated-blue-light before:content-['—']">Cancel anytime</li>
+        </ul>
+      </div>
+      <div class="border border-seated-blue bg-seated-blue-pale p-8 transition-colors hover:border-seated-blue-mid">
+        <div class="mb-[18px] text-[10px] uppercase tracking-[0.16em] text-seated-blue-mid">Embedded Widget</div>
+        <div class="mb-1 text-[52px] font-bold leading-none text-seated-ink"><sup class="font-inherit align-top text-[22px] leading-none">£</sup>60</div>
+        <div class="mb-[22px] text-[10px] tracking-[0.06em] text-seated-ink-light">PER MONTH · NO CONTRACT</div>
+        <ul class="flex list-none flex-col gap-2.5">
+          <li class="flex gap-2 font-serif text-xs leading-normal text-seated-ink-mid before:shrink-0 before:text-seated-blue-light before:content-['—']">Everything in Link</li>
+          <li class="flex gap-2 font-serif text-xs leading-normal text-seated-ink-mid before:shrink-0 before:text-seated-blue-light before:content-['—']">In-page booking widget</li>
+          <li class="flex gap-2 font-serif text-xs leading-normal text-seated-ink-mid before:shrink-0 before:text-seated-blue-light before:content-['—']">Paste one line of code</li>
+          <li class="flex gap-2 font-serif text-xs leading-normal text-seated-ink-mid before:shrink-0 before:text-seated-blue-light before:content-['—']">Matches your site design</li>
+          <li class="flex gap-2 font-serif text-xs leading-normal text-seated-ink-mid before:shrink-0 before:text-seated-blue-light before:content-['—']">Guests stay on your site</li>
+          <li class="flex gap-2 font-serif text-xs leading-normal text-seated-ink-mid before:shrink-0 before:text-seated-blue-light before:content-['—']">Works on any CMS</li>
+          <li class="flex gap-2 font-serif text-xs leading-normal text-seated-ink-mid before:shrink-0 before:text-seated-blue-light before:content-['—']">WordPress, Squarespace, Wix</li>
+          <li class="flex gap-2 font-serif text-xs leading-normal text-seated-ink-mid before:shrink-0 before:text-seated-blue-light before:content-['—']">Cancel anytime</li>
+        </ul>
+      </div>
+    </div>
+
+    <hr class="my-5 border-0 border-t border-seated-rule" />
+
+    <div class="text-center text-[10px] leading-loose tracking-[0.06em] text-seated-ink-light">
+      ALL PRICES EXCL. VAT &nbsp;·&nbsp; BILLED MONTHLY &nbsp;·&nbsp; NO SETUP FEES<br />
+      BUSY SATURDAY = QUIET TUESDAY &nbsp;·&nbsp; SAME PRICE, ALWAYS
+    </div>
+  </div>
+</div>
+
+<div class="relative flex h-[18px] w-full items-center overflow-hidden bg-seated-bg">
+  <div class="absolute left-0 right-0 top-1/2 border-t border-dashed border-seated-rule-dark"></div>
+  <div class="relative z-[1] flex w-full justify-between px-3">
+    {% for i in "xxxxxxxxxxxxxxxxxxxx" %}
+    <div class="size-2.5 shrink-0 rounded-full border border-seated-rule-dark bg-seated-bg"></div>
+    {% endfor %}
+  </div>
+</div>
+
+{# —— Blue CTA receipt —— #}
+<div class="lp-receipt lp-receipt-blue lp-fade-in">
+  <div class="relative z-[1] mx-auto max-w-content px-10">
+    <div class="mb-1.5 text-center text-2xl font-bold tracking-[0.22em] text-white">SEATED</div>
+    <hr class="my-5 border-0 border-t-[3px] border-double border-white/20" />
+    <div class="mb-9 text-center font-serif text-[22px] italic leading-snug text-white/65">
+      "We take care of the bookings.<br />
+      You take care of everything else."
+    </div>
+    <div class="text-center">
+      <a href="/signup/" class="inline-block bg-white px-12 py-[18px] font-mono text-xs font-bold uppercase tracking-[0.1em] text-seated-blue no-underline transition-colors hover:bg-seated-blue-pale">Get started — £50/month</a>
+      <div class="mt-4 text-[10px] tracking-[0.08em] text-white/25">© 2026 SEATED</div>
+    </div>
+  </div>
+</div>
+
+<footer class="flex w-full flex-wrap items-center justify-between gap-4 bg-seated-ink px-6 py-5 text-[10px] uppercase tracking-[0.08em] text-white/25 md:px-14">
+  <span>© 2026 Seated Ltd.</span>
+  <span>Privacy &nbsp;·&nbsp; Terms &nbsp;·&nbsp; Contact</span>
+</footer>
+
+<script>
+  function countUp(id, target, delay) {
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      let n = 0;
+      const step = target / 55;
+      const t = setInterval(() => {
+        n = Math.min(n + step, target);
+        el.textContent = Math.round(n);
+        if (n >= target) clearInterval(t);
+      }, 16);
+    }, delay);
+  }
+  countUp("counter", 320, 2200);
+
+  const obs = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        e.target.classList.add("lp-visible");
+        e.target.querySelectorAll(".lp-step-block").forEach((s, i) => {
+          setTimeout(() => s.classList.add("lp-visible"), i * 120 + 100);
+        });
+      });
+    },
+    { threshold: 0.08 }
+  );
+  document.querySelectorAll(".lp-fade-in").forEach((el) => obs.observe(el));
+</script>
+{% endblock %}

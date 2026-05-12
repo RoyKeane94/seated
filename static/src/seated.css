@@ -1,0 +1,236 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Till-roll components (not expressible only with utilities) */
+@layer components {
+  .receipt {
+    @apply mx-auto my-6 max-w-content border border-seated-rule bg-white shadow-sm;
+  }
+  .receipt.receipt-slim {
+    @apply max-w-auth;
+  }
+  .receipt.receipt-signup {
+    @apply max-w-signup;
+  }
+  .receipt-inner {
+    @apply px-5 py-6;
+  }
+  .receipt-cream {
+    @apply bg-seated-cream;
+  }
+  .tear {
+    @apply relative border-t-2 border-dashed border-seated-rule-dark;
+  }
+  .tear::before,
+  .tear::after {
+    content: "";
+    @apply absolute -top-1.5 size-2.5 rounded-full bg-seated-bg;
+  }
+  .tear::before {
+    @apply -left-[5px];
+  }
+  .tear::after {
+    @apply -right-[5px];
+  }
+  .btn-primary {
+    @apply inline-block cursor-pointer border border-seated-blue bg-seated-blue px-[18px] py-3 font-mono text-xs font-bold uppercase tracking-[0.08em] text-white;
+  }
+  .btn-primary:hover {
+    @apply bg-seated-blue-mid;
+  }
+  .input,
+  select.input,
+  textarea.input {
+    @apply box-border w-full max-w-full min-h-[2.75rem] rounded-none border border-seated-rule-dark bg-white px-3 py-2 font-mono text-sm text-seated-ink;
+  }
+  textarea.input {
+    @apply min-h-20 resize-y;
+  }
+  select.input,
+  .select-native {
+    @apply cursor-pointer appearance-none bg-white pr-10;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath fill='none' stroke='%236B6E7A' stroke-width='1.5' stroke-linecap='round' d='M3.5 5.25L7 8.75l3.5-3.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.65rem center;
+    background-size: 0.875rem;
+  }
+  .receipt-inner .form-stack input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"]),
+  .receipt-inner .form-stack select,
+  .receipt-inner .form-stack textarea {
+    @apply box-border w-full max-w-full min-h-[2.75rem] rounded-none border border-seated-rule-dark bg-white px-3 py-2 font-mono text-sm text-seated-ink;
+  }
+  .receipt-inner .form-stack select {
+    @apply cursor-pointer appearance-none pr-10;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath fill='none' stroke='%236B6E7A' stroke-width='1.5' stroke-linecap='round' d='M3.5 5.25L7 8.75l3.5-3.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.65rem center;
+    background-size: 0.875rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+  }
+  .receipt-inner .form-stack textarea {
+    @apply min-h-20 resize-y;
+  }
+  /* Plan / radio choice lists — two visible option cards on larger screens */
+  .receipt-inner .form-stack ul.plan-choice-list {
+    @apply m-0 grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2;
+  }
+  .receipt-inner .form-stack ul.plan-choice-list > li {
+    @apply m-0 flex min-w-0 p-0;
+  }
+  .receipt-inner .form-stack ul.plan-choice-list label {
+    @apply box-border flex h-full min-h-[6.5rem] w-full cursor-pointer flex-col items-stretch gap-2 border border-seated-rule-dark bg-white px-3 py-3 font-mono text-sm leading-snug text-seated-ink transition-colors;
+    white-space: pre-line;
+  }
+  .receipt-inner .form-stack ul.plan-choice-list label:hover {
+    @apply border-seated-blue-mid;
+  }
+  .receipt-inner .form-stack ul.plan-choice-list li:has(input:checked) label {
+    @apply border-seated-blue ring-1 ring-seated-blue;
+  }
+  .receipt-inner .form-stack ul.plan-choice-list input[type="radio"] {
+    @apply mb-0.5 mt-0 size-[1.1rem] min-h-0 shrink-0 self-start;
+    accent-color: #1b3a6b;
+  }
+  .receipt-inner .form-stack input[type="checkbox"],
+  .receipt-inner .form-stack input[type="radio"] {
+    @apply mt-[0.15rem] size-[1.1rem] min-h-0 shrink-0 align-middle;
+    accent-color: #1b3a6b;
+  }
+  .receipt .errorlist,
+  .receipt-inner .errorlist {
+    @apply m-0 mt-2 list-none p-0 text-xs text-[#5c1010];
+  }
+  .receipt-inner p.help,
+  .receipt-inner .helptext {
+    @apply mt-1.5 text-xs leading-relaxed text-seated-ink-light;
+  }
+  .btn-row {
+    @apply cursor-pointer border border-seated-rule-dark bg-white px-2 py-[0.35rem] font-mono text-[0.7rem] uppercase tracking-[0.06em] text-seated-ink-mid;
+  }
+  .btn-row:hover {
+    @apply border-seated-blue text-seated-blue;
+  }
+
+  /* Custom dropdown (native <select> lists cannot be styled on macOS / Chrome) */
+  .seated-dropdown {
+    @apply relative;
+  }
+  .seated-dropdown-trigger {
+    @apply box-border flex w-full min-h-[2.75rem] cursor-pointer items-center justify-between gap-2 rounded-none border border-seated-rule-dark bg-white px-3 py-2 text-left font-mono text-sm text-seated-ink;
+  }
+  .seated-dropdown-trigger:hover {
+    @apply border-seated-blue-mid;
+  }
+  .seated-dropdown-panel {
+    @apply absolute left-0 right-0 top-full z-[200] mt-px hidden max-h-48 overflow-y-auto border border-seated-rule-dark bg-white py-1 shadow-md;
+    margin: 0;
+    list-style: none;
+    padding: 0;
+  }
+  .seated-dropdown.is-open .seated-dropdown-panel {
+    display: block;
+  }
+  .seated-dropdown-option {
+    @apply cursor-pointer px-3 py-2 font-mono text-sm text-seated-ink;
+  }
+  .seated-dropdown-option:hover,
+  .seated-dropdown-option:focus {
+    @apply bg-seated-cream outline-none;
+  }
+  .seated-dropdown-option.is-active {
+    @apply bg-seated-blue-pale text-seated-blue;
+  }
+
+  /* Landing page (home) */
+  .lp-receipt {
+    @apply relative w-full bg-white py-16;
+  }
+  .lp-receipt::before {
+    content: "";
+    @apply pointer-events-none absolute inset-0;
+    background: repeating-linear-gradient(transparent, transparent 23px, rgba(0, 0, 0, 0.014) 24px);
+  }
+  .lp-receipt.lp-receipt-blue {
+    @apply bg-seated-blue;
+  }
+  .lp-receipt.lp-receipt-blue::before {
+    @apply hidden;
+  }
+  .lp-item {
+    animation: lp-printLine 0.18s ease forwards;
+    @apply opacity-0;
+  }
+  .lp-item:nth-child(1) {
+    animation-delay: 0.3s;
+  }
+  .lp-item:nth-child(2) {
+    animation-delay: 0.52s;
+  }
+  .lp-item:nth-child(3) {
+    animation-delay: 0.74s;
+  }
+  .lp-item:nth-child(4) {
+    animation-delay: 0.96s;
+  }
+  .lp-item:nth-child(5) {
+    animation-delay: 1.18s;
+  }
+  .lp-item:nth-child(6) {
+    animation-delay: 1.4s;
+  }
+  .lp-item:nth-child(7) {
+    animation-delay: 1.62s;
+  }
+  .lp-item:nth-child(8) {
+    animation-delay: 1.84s;
+  }
+  .lp-cta-hero {
+    animation: lp-printLine 0.3s ease 2.1s both;
+    @apply opacity-0;
+  }
+  .lp-tagline-cta {
+    animation: lp-printLine 0.3s ease 2.4s both;
+    @apply opacity-0;
+  }
+  .lp-fine-hero {
+    animation: lp-printLine 0.3s ease 2.6s both;
+    @apply opacity-0;
+  }
+  .lp-fade-in {
+    @apply translate-y-2.5 opacity-0 transition-[opacity,transform] duration-700 ease-in-out;
+  }
+  .lp-fade-in.lp-visible {
+    @apply translate-y-0 opacity-100;
+  }
+  .lp-step-block {
+    @apply opacity-0 transition-opacity duration-500 ease-in-out;
+  }
+  .lp-step-block.lp-visible {
+    @apply opacity-100;
+  }
+}
+
+@layer utilities {
+  .bg-page-texture {
+    background-image: repeating-linear-gradient(
+      transparent,
+      transparent 23px,
+      rgba(0, 0, 0, 0.014) 24px
+    );
+  }
+}
+
+@keyframes lp-printLine {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

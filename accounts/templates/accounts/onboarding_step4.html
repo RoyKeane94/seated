@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Setup step 4 - Seated{% endblock %}
+{% block content %}
+<section class="receipt">
+  <div class="receipt-inner">
+    <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-seated-ink-light">Step {{ step }} of 4</p>
+    <h1 class="mt-2 text-2xl font-bold text-seated-ink">Review and go live</h1>
+    <hr class="my-6 border-0 border-t border-seated-rule" />
+    <div class="space-y-2 text-sm text-seated-ink-mid">
+      <p><span class="text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink-light">Booking link</span><br />
+        <span class="font-mono text-seated-blue">{{ request.scheme }}://{{ request.get_host }}/book/{{ preview_booking_slug }}/</span>
+      </p>
+      <p class="pt-2 text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink-light">Embed code</p>
+      <pre class="max-h-40 overflow-auto border border-seated-rule-dark bg-seated-cream p-3 font-mono text-[11px] text-seated-ink">&lt;script src="{{ request.scheme }}://{{ request.get_host }}/static/js/widget.js" data-restaurant="{{ preview_booking_slug }}"&gt;&lt;/script&gt;</pre>
+    </div>
+    <form method="post" class="form-stack mt-8">
+      {% csrf_token %}
+      <div class="flex flex-wrap items-center justify-between gap-4 border-t border-seated-rule pt-6">
+        <a href="{% url 'accounts:onboarding_step3' %}" class="text-[11px] font-bold uppercase tracking-navlink text-seated-ink-light no-underline transition-colors hover:text-seated-ink">← Back</a>
+        <button class="btn-primary" type="submit">Finish and start billing</button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

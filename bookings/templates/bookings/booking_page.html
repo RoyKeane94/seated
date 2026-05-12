@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Book {{ restaurant.name }} - Seated{% endblock %}
+{% block content %}
+<section class="receipt">
+  <div class="receipt-inner">
+    <h1 class="text-3xl font-bold uppercase tracking-tight text-seated-ink">{{ restaurant.name }}</h1>
+    {% if restaurant.address_line1 or restaurant.postcode %}
+    <p class="mt-1 font-serif text-sm italic text-seated-ink-mid">{{ restaurant.address_line1 }}{% if restaurant.address_line1 and restaurant.postcode %} · {% endif %}{{ restaurant.postcode }}</p>
+    {% endif %}
+    <p class="mt-1 text-[10px] tracking-[0.06em] text-seated-blue-light">{{ request.scheme }}://{{ request.get_host }}{{ restaurant.get_booking_url }}</p>
+  </div>
+  <div class="tear"></div>
+  <div class="receipt-inner receipt-cream">
+    <form method="post" id="booking-form" class="form-stack">
+      {% csrf_token %}
+      <input type="hidden" id="widget-session-token" value="{{ widget_session_token }}">
+      {% if form.non_field_errors %}
+      <div class="mb-4 border border-seated-rule-dark bg-white px-3 py-2 text-sm text-seated-ink">{{ form.non_field_errors }}</div>
+      {% endif %}
+      {% for field in form %}
+        {% if field.name == "party_size" %}
+        <div class="form-field mb-4">
+          <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink-light" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}{{ field.errors }}{% endif %}
+        </div>
+        <div class="form-field mb-4">
+          <p class="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink-light">Available times</p>
+          <div id="slot-grid" class="grid grid-cols-2 gap-2 md:grid-cols-3"></div>
+          {% if form.time.errors %}<ul class="errorlist">{{ form.time.errors }}</ul>{% endif %}
+        </div>
+        {% elif field.name == "time" %}
+        {{ field }}
+        {% elif field.is_hidden %}
+        {{ field }}
+        {% else %}
+        <div class="form-field mb-4">
+          <label class="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink-light" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<p class="helptext">{{ field.help_text }}</p>{% endif %}
+          {% if field.errors %}{{ field.errors }}{% endif %}
+        </div>
+        {% endif %}
+      {% endfor %}
+      <div class="mt-8 border-t border-seated-rule pt-6">
+        <button class="btn-primary w-full md:w-auto" type="submit">Confirm booking</button>
+      </div>
+    </form>
+  </div>
+</section>
+<script>
+(() => {
+  const dateInput = document.querySelector('input[name="date"]');
+  const partyInput = document.querySelector('input[name="party_size"]');
+  const selectedTime = document.getElementById('selected-time');
+  const slotGrid = document.getElementById('slot-grid');
+  const bookingForm = document.getElementById('booking-form');
+
+  const syncHeights = () => {
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'seated:height', height: document.body.scrollHeight }, '*');
+    }
+  };
+
+  const slotBtnBase =
+    'border border-seated-rule-dark bg-seated-paper px-2 py-2.5 text-sm text-seated-ink transition-colors hover:border-seated-blue-mid';
+  const slotBtnOn = ' border-seated-blue bg-seated-blue-pale ring-1 ring-seated-blue';
+
+  const loadSlots = async () => {
+    if (!dateInput.value || !partyInput.value) return;
+    const res = await fetch(`/api/widget/{{ restaurant.slug }}/?date=${dateInput.value}&party=${partyInput.value}`);
+    const data = await res.json();
+    slotGrid.innerHTML = '';
+    (data.slots || []).forEach((slot) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = slotBtnBase;
+      btn.textContent = slot;
+      btn.onclick = () => {
+        const s = String(slot);
+        selectedTime.value = s.split(':').length === 3 ? s : `${s}:00`;
+        [...slotGrid.children].forEach((c) => {
+          c.className = slotBtnBase;
+        });
+        btn.className = slotBtnBase + slotBtnOn;
+      };
+      slotGrid.appendChild(btn);
+    });
+    syncHeights();
+  };
+
+  bookingForm?.addEventListener('submit', (event) => {
+    if (!selectedTime || !selectedTime.value) {
+      event.preventDefault();
+      alert('Please select a time slot.');
+    }
+  });
+
+  dateInput?.addEventListener('change', loadSlots);
+  partyInput?.addEventListener('change', loadSlots);
+  window.addEventListener('load', syncHeights);
+  new MutationObserver(syncHeights).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+{% endblock %}

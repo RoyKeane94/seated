@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Signup - Seated{% endblock %}
+
+{% block nav %}
+<nav class="sticky top-0 z-[100] flex w-full items-center border-b-2 border-seated-ink bg-seated-paper px-6 py-5 md:px-14">
+  <a href="/" class="font-mono text-[15px] font-bold tracking-[0.14em] text-seated-ink no-underline">SEATED<span class="text-seated-blue-mid">.</span></a>
+</nav>
+{% endblock %}
+
+{% block content %}
+<section class="receipt receipt-signup">
+  <div class="receipt-inner">
+    <h1 class="text-2xl font-bold tracking-tight text-seated-ink">Restaurant signup</h1>
+
+    <p class="mt-5 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-seated-ink-mid">Trusted by independent restaurants across London</p>
+    <p class="mt-2 text-center font-mono text-[11px] leading-relaxed text-seated-ink-light">
+      £50/month · No contract · Cancel anytime
+    </p>
+
+    <hr class="my-6 border-0 border-t border-seated-rule" />
+
+    <form method="post" class="form-stack mt-2">
+      {% csrf_token %}
+      {% include "includes/form_fields.html" with form=form %}
+      <div class="mt-8 border-t border-seated-rule pt-6">
+        <p class="mb-4 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-seated-ink-light">Step 1 of 4 — Account</p>
+        <button class="btn-primary w-full text-center sm:w-auto" type="submit">Continue to setup</button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Login - Seated{% endblock %}
+
+{% block nav %}
+<nav class="sticky top-0 z-[100] flex w-full items-center border-b-2 border-seated-ink bg-seated-paper px-6 py-5 md:px-14">
+  <a href="/" class="font-mono text-[15px] font-bold tracking-[0.14em] text-seated-ink no-underline">SEATED<span class="text-seated-blue-mid">.</span></a>
+</nav>
+{% endblock %}
+
+{% block content %}
+<section class="receipt receipt-slim">
+  <div class="receipt-inner">
+    <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-seated-ink-light">Seated</p>
+    <h1 class="mt-2 text-2xl font-bold text-seated-ink">Login</h1>
+    <hr class="my-6 border-0 border-t border-seated-rule" />
+    <form method="post" class="form-stack">
+      {% csrf_token %}
+      {% include "includes/form_fields.html" with form=form %}
+      <div class="mt-8">
+        <button class="btn-primary w-full text-center sm:w-auto" type="submit">Sign in</button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

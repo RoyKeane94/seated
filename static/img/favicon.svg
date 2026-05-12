@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Seated">
+  <!-- Till-roll paper; mark in seated blue #1B3A6B -->
+  <rect width="32" height="32" rx="4" fill="#F5F1EA"/>
+  <path fill="#1B3A6B" d="M8 8h5v14H8V8zm0 13h18v4H8v-4zm14 0h4v11h-4V21z"/>
+</svg>

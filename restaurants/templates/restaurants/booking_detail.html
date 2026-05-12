@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Booking {{ booking.id }} - Seated{% endblock %}
+{% block content %}
+<section class="receipt">
+  <div class="receipt-inner">
+    <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-seated-ink-light">Dashboard</p>
+    <h1 class="mt-2 text-2xl font-bold text-seated-ink">Booking #{{ booking.id }}</h1>
+    <p class="mt-2 font-serif text-sm italic text-seated-ink-mid">Edit guest details, status, and table assignment.</p>
+    <hr class="my-6 border-0 border-t border-seated-rule" />
+    <form method="post" class="form-stack">
+      {% csrf_token %}
+      {% include "includes/form_fields.html" with form=form %}
+      <div class="mt-8">
+        <button class="btn-primary" type="submit">Save booking</button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

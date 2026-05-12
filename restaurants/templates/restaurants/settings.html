@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="receipt">
+  <div class="receipt-inner">
+    <h1 class="text-2xl font-bold text-seated-ink">Restaurant settings</h1>
+    <p class="mt-4 text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink-light">Public booking link</p>
+    <p class="mt-1 font-mono text-sm text-seated-blue">{{ request.scheme }}://{{ request.get_host }}{{ restaurant.get_booking_url }}</p>
+    <p class="mt-2 text-xs text-seated-ink-mid">This address is set when you finish setup from your restaurant name.</p>
+    <hr class="my-6 border-0 border-t border-seated-rule" />
+    <form method="post" class="form-stack">
+      {% csrf_token %}
+      {% include "includes/form_fields.html" with form=form %}
+      <div class="mt-8">
+        <button class="btn-primary" type="submit">Save settings</button>
+      </div>
+    </form>
+  </div>
+  <div class="tear"></div>
+  <div class="receipt-inner receipt-cream">
+    <h2 class="text-xs font-bold uppercase tracking-section text-seated-ink-light">Add table</h2>
+    <form method="post" action="{% url 'restaurants:add_table' %}" class="form-stack mt-4">
+      {% csrf_token %}
+      {% include "includes/form_fields.html" with form=table_form %}
+      <button class="btn-primary mt-4" type="submit">Add table</button>
+    </form>
+    <h2 class="mt-10 text-xs font-bold uppercase tracking-section text-seated-ink-light">Add service</h2>
+    <form method="post" action="{% url 'restaurants:add_service' %}" class="form-stack mt-4">
+      {% csrf_token %}
+      {% include "includes/form_fields.html" with form=service_form %}
+      <button class="btn-primary mt-4" type="submit">Add service</button>
+    </form>
+    <h2 class="mt-10 text-xs font-bold uppercase tracking-section text-seated-ink-light">Block date</h2>
+    <form method="post" action="{% url 'restaurants:add_closed_date' %}" class="form-stack mt-4">
+      {% csrf_token %}
+      {% include "includes/form_fields.html" with form=closed_date_form %}
+      <button class="btn-primary mt-4" type="submit">Block date</button>
+    </form>
+    {% if billing_portal_enabled %}
+    <h2 class="mt-10 text-xs font-bold uppercase tracking-section text-seated-ink-light">Billing</h2>
+    <a href="{% url 'restaurants:billing_portal' %}" class="btn-primary mt-4 inline-block">Open Stripe customer portal</a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

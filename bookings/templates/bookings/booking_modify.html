@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Modify booking - Seated{% endblock %}
+{% block content %}
+<section class="receipt">
+  <div class="receipt-inner">
+    <h1 class="text-2xl font-bold text-seated-ink">Modify booking</h1>
+    <hr class="my-6 border-0 border-t border-seated-rule" />
+    <form method="post" class="form-stack">
+      {% csrf_token %}
+      {% include "includes/form_fields.html" with form=form %}
+      <div class="mt-8">
+        <button class="btn-primary" type="submit">Save changes</button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

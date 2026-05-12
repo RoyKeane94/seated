@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Booking confirmed - Seated{% endblock %}
+{% block content %}
+<section class="receipt">
+  <div class="receipt-inner">
+    <p class="text-[10px] font-bold uppercase tracking-section text-seated-ink-light">Confirmation</p>
+    <h1 class="mt-2 text-2xl font-bold text-seated-ink">Booking confirmed</h1>
+    <hr class="my-6 border-0 border-t border-double border-seated-rule-dark" />
+    <p class="text-seated-ink-mid">{{ booking.guest_name }} · {{ booking.party_size }} guests</p>
+    <p class="mt-1 font-bold text-seated-ink">{{ booking.date }} at {{ booking.time }}</p>
+    <hr class="my-6 border-0 border-t border-seated-rule" />
+    <p class="text-sm text-seated-ink-light">
+      Cancel: <a class="break-all text-seated-blue underline decoration-seated-rule hover:text-seated-blue-mid" href="{{ booking.get_cancel_url }}">{{ request.scheme }}://{{ request.get_host }}{{ booking.get_cancel_url }}</a>
+    </p>
+    <p class="mt-2 text-sm text-seated-ink-light">
+      Modify: <a class="break-all text-seated-blue underline decoration-seated-rule hover:text-seated-blue-mid" href="{{ booking.get_modify_url }}">{{ request.scheme }}://{{ request.get_host }}{{ booking.get_modify_url }}</a>
+    </p>
+    <p class="mt-4">
+      <a class="text-sm font-bold uppercase tracking-navlink text-seated-blue hover:text-seated-blue-mid" href="{% url 'bookings:booking_ics' booking.id %}">Add to calendar (.ics)</a>
+    </p>
+  </div>
+</section>
+{% endblock %}
