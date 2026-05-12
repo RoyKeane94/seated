@@ -1,6 +1,8 @@
+from pathlib import Path
+
+from django.conf import settings
 from django.contrib import admin
-from django.contrib.staticfiles.storage import staticfiles_storage
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import FileResponse, HttpResponse
 from django.shortcuts import render
 from django.urls import include, path
 
@@ -13,15 +15,19 @@ def health(request):
     return HttpResponse("ok")
 
 
-def favicon_redirect(request):
-    """Serve /favicon.ico — browsers prefetch this URL before parsing <link rel=icon>."""
-    url = staticfiles_storage.url("img/favicon.svg")
-    return HttpResponseRedirect(url)
+def favicon(request):
+    """Serve raster favicon at /favicon.ico (Chrome reliably uses PNG; extension is legacy)."""
+    path = Path(settings.BASE_DIR) / "static/img/favicon.png"
+    if not path.is_file():
+        return HttpResponse(status=404)
+    response = FileResponse(path.open("rb"), content_type="image/png")
+    response["Cache-Control"] = "public, max-age=604800, immutable"
+    return response
 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("favicon.ico", favicon_redirect, name="favicon"),
+    path("favicon.ico", favicon, name="favicon"),
     path("", home, name="home"),
     path("health/", health, name="health"),
     path("", include("accounts.urls")),

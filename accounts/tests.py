@@ -18,6 +18,11 @@ class SiteSmokeTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content.decode(), "ok")
 
+    def test_favicon_returns_png(self):
+        response = self.client.get("/favicon.ico")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("png", response.get("Content-Type", "").lower())
+
 
 @override_settings(DEBUG=False)
 class ErrorHandlerTests(TestCase):
