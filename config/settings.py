@@ -11,9 +11,8 @@ env = environ.Env()
 environ.Env.read_env(BASE_DIR / ".env")
 
 SECRET_KEY = env("DJANGO_SECRET_KEY")
-# Default True so local dev serves CSS from STATICFILES_DIRS without collectstatic.
-# Set DEBUG=False in production (e.g. Railway) and run collectstatic before deploy.
-DEBUG = env.bool("DEBUG")
+# Omit DEBUG on the host → production-safe default. Local: DEBUG=True in .env.
+DEBUG = env.bool("DEBUG", default=False)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"])
 
 # In development, serve static from finders when DEBUG=True (no collectstatic required).
@@ -26,6 +25,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "config.apps.ConfigConfig",
     "restaurants",
     "bookings",
     "accounts",
@@ -33,6 +33,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "config.middleware.RequestIdMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -55,6 +56,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "config.context_processors.seated_globals",
             ],
         },
     }
@@ -157,3 +159,24 @@ STRIPE_PRICE_WIDGET = env("STRIPE_PRICE_WIDGET", default="")
 RESEND_API_KEY = env("RESEND_API_KEY", default="")
 FROM_EMAIL = env("FROM_EMAIL", default="bookings@seated.co")
 SITE_URL = env("SITE_URL", default="http://localhost:8000")
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "seated": {
+            "format": "[{levelname}] {asctime} {name}: {message}",
+            "style": "{",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
+    },
+    "handlers": {
+        "stderr": {"class": "logging.StreamHandler", "formatter": "seated"},
+    },
+    "loggers": {
+        "seated.request": {"handlers": ["stderr"], "level": "ERROR", "propagate": False},
+        "seated.errors": {"handlers": ["stderr"], "level": "WARNING", "propagate": False},
+        "django.request": {"handlers": ["stderr"], "level": "ERROR", "propagate": False},
+    },
+    "root": {"handlers": ["stderr"], "level": "INFO"},
+}

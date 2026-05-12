@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block title %}Access denied · Seated{% endblock %}
+
+{% block content %}
+{% include "includes/error_receipt_panel.html" with subtitle="Error 403" headline="You don’t have access to this." hint="You may need to sign in with a different account, or return to where you came from." primary_label="Home" %}
+{% endblock %}

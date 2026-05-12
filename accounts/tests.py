@@ -19,6 +19,16 @@ class SiteSmokeTests(TestCase):
         self.assertEqual(response.content.decode(), "ok")
 
 
+@override_settings(DEBUG=False)
+class ErrorHandlerTests(TestCase):
+    """Custom handlers register only when DEBUG is False."""
+
+    def test_404_returns_receipt_style_page(self):
+        response = self.client.get("/never-gonna-route-this-path-abc/")
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, "Nothing here matches that ticket", status_code=404)
+
+
 class SignupAndAuthTests(TestCase):
     def test_signup_creates_user_starts_onboarding(self):
         response = self.client.post(

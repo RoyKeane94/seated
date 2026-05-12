@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block title %}Bad request · Seated{% endblock %}
+
+{% block content %}
+{% include "includes/error_receipt_panel.html" with subtitle="Error 400" headline="That request couldn’t be understood." hint="Something about the link or form data was malformed. Try again from the homepage or refresh the previous page." primary_label="Home" %}
+{% endblock %}

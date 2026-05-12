@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block title %}Something broke · Seated{% endblock %}
+
+{% block content %}
+{% include "includes/error_receipt_panel.html" with subtitle="Error 500" headline="We hit an unexpected snag." hint="Sorry about that—we’ve logged the details. If this keeps happening, contact support with the reference below." primary_label="Home" %}
+{% endblock %}

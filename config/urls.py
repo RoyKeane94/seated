@@ -20,3 +20,8 @@ urlpatterns = [
     path("", include("restaurants.urls")),
     path("", include("bookings.urls")),
 ]
+
+handler400 = "config.error_views.handler400"
+handler403 = "config.error_views.handler403"
+handler404 = "config.error_views.handler404"
+handler500 = "config.error_views.handler500"

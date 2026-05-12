@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block title %}Page not found · Seated{% endblock %}
+
+{% block content %}
+{% include "includes/error_receipt_panel.html" with subtitle="Error 404" headline="Nothing here matches that ticket." hint="The page might have moved, or the link could be outdated. Use the homepage or try again." primary_label="Home" %}
+{% endblock %}
