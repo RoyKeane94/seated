@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 
@@ -62,9 +63,35 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
-DATABASES = {
-    "default": env.db("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
-}
+_sqlite_default = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+_database_url = (os.environ.get("DATABASE_URL") or "").strip()
+
+if DEBUG:
+    DATABASES = {
+        "default": env.db(
+            "DATABASE_URL",
+            default=_sqlite_default,
+        ),
+    }
+elif _database_url:
+    DATABASES = {"default": environ.Env.db_url_config(_database_url)}
+else:
+    # Production with discrete Railway / Postgres vars (no DATABASE_URL string).
+    _db_options = {}
+    if env.bool("DATABASE_SSL_REQUIRE", default=True):
+        _db_options["sslmode"] = "require"
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": env("DB_NAME"),
+            "USER": env("DB_USER"),
+            "PASSWORD": env("DB_PASSWORD"),
+            "HOST": env("DB_HOST"),
+            "PORT": env("DB_PORT"),
+            "CONN_MAX_AGE": env.int("DB_CONN_MAX_AGE", default=60),
+            "OPTIONS": _db_options,
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 8}},

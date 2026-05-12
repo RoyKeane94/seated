@@ -2,7 +2,8 @@
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "gunicorn config.wsgi --log-file -"
+# Railway injects PORT; binding to localhost breaks the LB healthcheck.
+startCommand = "gunicorn config.wsgi --bind 0.0.0.0:$PORT --log-file -"
 healthcheckPath = "/health/"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
