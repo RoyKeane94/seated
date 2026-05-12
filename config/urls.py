@@ -1,5 +1,6 @@
 from django.contrib import admin
-from django.http import HttpResponse
+from django.contrib.staticfiles.storage import staticfiles_storage
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import include, path
 
@@ -12,8 +13,15 @@ def health(request):
     return HttpResponse("ok")
 
 
+def favicon_redirect(request):
+    """Serve /favicon.ico — browsers prefetch this URL before parsing <link rel=icon>."""
+    url = staticfiles_storage.url("img/favicon.svg")
+    return HttpResponseRedirect(url)
+
+
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("favicon.ico", favicon_redirect, name="favicon"),
     path("", home, name="home"),
     path("health/", health, name="health"),
     path("", include("accounts.urls")),
