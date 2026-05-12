@@ -1,8 +1,0 @@
-# Django + Tailwind: Nixpacks often picks Node only when package.json exists; add Python explicitly.
-providers = ["node", "python"]
-
-[phases.build]
-cmds = ["npm run build:css", "python manage.py collectstatic --noinput"]
-
-[variables]
-NODE_ENV = "production"
