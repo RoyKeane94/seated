@@ -44,7 +44,14 @@ def booking_page(request, slug):
         return render(
             request,
             "bookings/restaurant_not_live.html",
-            {"restaurant": restaurant},
+            {"restaurant": restaurant, "not_live_reason": "subscription"},
+            status=503,
+        )
+    if not restaurant.booking_link_published:
+        return render(
+            request,
+            "bookings/restaurant_not_live.html",
+            {"restaurant": restaurant, "not_live_reason": "unpublished"},
             status=503,
         )
     if "widget_session_token" not in request.session:
@@ -149,6 +156,8 @@ def widget_api(request, slug):
     restaurant = get_object_or_404(Restaurant, slug=slug)
     if not restaurant.subscription_active:
         return JsonResponse({"error": "restaurant_not_live"}, status=503)
+    if not restaurant.booking_link_published:
+        return JsonResponse({"error": "booking_link_not_published"}, status=503)
     date_str = request.GET.get("date")
     party_size = int(request.GET.get("party", "2"))
     if not date_str:
@@ -176,6 +185,8 @@ def booking_api(request, slug):
     restaurant = get_object_or_404(Restaurant, slug=slug)
     if not restaurant.subscription_active:
         return JsonResponse({"error": "restaurant_not_live"}, status=503)
+    if not restaurant.booking_link_published:
+        return JsonResponse({"error": "booking_link_not_published"}, status=503)
     widget_session_header = request.headers.get("X-Widget-Session")
     session_token = request.session.get("widget_session_token")
     if not widget_session_header or not session_token or widget_session_header != session_token:

@@ -10,8 +10,102 @@
   .receipt.receipt-slim {
     @apply max-w-auth;
   }
-  .receipt.receipt-signup {
-    @apply max-w-signup;
+  body.page-signup {
+    margin: 0;
+    background-image: none;
+    min-height: 100dvh;
+    @apply bg-white;
+  }
+  body.page-onboarding-split {
+    margin: 0;
+    background-image: none;
+    min-height: 100dvh;
+    @apply bg-white;
+  }
+  /* Split onboarding (step 1): vertical rail — no gradients (Seated UI rules). */
+  .onboarding-rail-item {
+    @apply relative flex gap-3.5 py-3.5 font-mono;
+  }
+  .onboarding-rail-item:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: 10px;
+    top: 2.375rem;
+    bottom: -2px;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .onboarding-rail-dot {
+    @apply relative z-[1] flex size-5 shrink-0 items-center justify-center rounded-full font-mono text-[9px] font-bold leading-none;
+  }
+  .onboarding-rail-item-active .onboarding-rail-dot {
+    @apply bg-white text-seated-blue;
+  }
+  .onboarding-rail-item-upcoming .onboarding-rail-dot {
+    @apply border border-white/15 bg-white/10 text-white/35;
+  }
+  .onboarding-rail-item-done .onboarding-rail-dot {
+    @apply bg-white/15 text-[10px] text-white/70;
+  }
+  .onboarding-rail-name {
+    @apply text-xs font-bold tracking-[0.04em];
+  }
+  .onboarding-rail-item-active .onboarding-rail-name {
+    @apply text-white/95;
+  }
+  .onboarding-rail-item-upcoming .onboarding-rail-name {
+    @apply text-white/30;
+  }
+  .onboarding-rail-item-done .onboarding-rail-name {
+    @apply text-white/45;
+  }
+  .onboarding-rail-desc {
+    @apply mt-0.5 text-[11px] leading-snug text-white/30;
+  }
+  .onboarding-rail-item-active .onboarding-rail-desc {
+    @apply text-white/50;
+  }
+  .onboarding-details-form .input:focus-visible {
+    @apply outline-none ring-2 ring-seated-blue ring-offset-2;
+  }
+  .input.onboarding-input-account-email {
+    @apply bg-seated-paper-warm text-seated-ink-mid;
+  }
+  /* Split signup layout: richer plan tiles (radios rendered in template). */
+  .receipt-inner .form-stack ul.signup-plan-list label.signup-plan-option {
+    white-space: normal;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0.875rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 1.125rem;
+    padding-bottom: 1.125rem;
+    min-height: 7.75rem;
+  }
+  .receipt-inner .form-stack ul.signup-plan-list label.signup-plan-option:hover {
+    @apply border-seated-blue-mid;
+  }
+  .receipt-inner .form-stack ul.signup-plan-list li:has(input:checked) label.signup-plan-option {
+    @apply border-seated-blue ring-1 ring-seated-blue;
+  }
+  .signup-plan-option-body {
+    @apply flex min-w-0 flex-1 flex-col gap-1;
+  }
+  .signup-plan-title {
+    @apply font-mono text-[13px] font-bold text-seated-ink;
+  }
+  .signup-plan-price {
+    @apply flex flex-wrap items-baseline gap-0 text-seated-ink;
+  }
+  .signup-plan-money {
+    @apply text-[26px] leading-none;
+  }
+  .signup-plan-period {
+    @apply font-mono text-xs font-normal text-seated-ink-light;
+  }
+  .signup-plan-desc {
+    @apply font-mono text-[11px] leading-snug text-seated-ink-light;
   }
   .receipt-inner {
     @apply px-5 py-6;
@@ -101,11 +195,13 @@
     accent-color: #1b3a6b;
   }
   .receipt .errorlist,
-  .receipt-inner .errorlist {
+  .receipt-inner .errorlist,
+  .onboarding-details-form .errorlist {
     @apply m-0 mt-2 list-none p-0 text-xs text-[#5c1010];
   }
   .receipt-inner p.help,
-  .receipt-inner .helptext {
+  .receipt-inner .helptext,
+  .onboarding-details-form .helptext {
     @apply mt-1.5 text-xs leading-relaxed text-seated-ink-light;
   }
   .btn-row {

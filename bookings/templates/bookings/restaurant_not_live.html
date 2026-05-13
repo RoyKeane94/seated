@@ -4,11 +4,17 @@
 <section class="receipt">
   <div class="receipt-inner">
     <h1 class="text-2xl font-bold text-seated-ink">{{ restaurant.name }}</h1>
-    <p class="mt-4 text-sm leading-relaxed text-seated-ink-mid">
+    {% if not_live_reason == "unpublished" %}
+    <p class="mt-4 font-mono text-sm leading-relaxed text-seated-ink-mid">
+      Online bookings aren’t open yet. The restaurant hasn’t published its booking link — you’ll need to ring or email them directly for now.
+    </p>
+    {% else %}
+    <p class="mt-4 font-mono text-sm leading-relaxed text-seated-ink-mid">
       Online bookings are not available yet for this restaurant. The page exists, but the subscription has not been activated
       (for example, checkout may not be complete).
     </p>
-    <p class="mt-4 text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink-light">Booking link</p>
+    {% endif %}
+    <p class="mt-6 text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink-light">Booking link</p>
     <p class="mt-1 font-mono text-sm text-seated-blue">{{ request.scheme }}://{{ request.get_host }}{{ restaurant.get_booking_url }}</p>
   </div>
 </section>

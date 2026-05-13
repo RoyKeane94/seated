@@ -48,6 +48,8 @@ class SignupForm(UserCreationForm):
         self.fields["email"].widget.attrs.setdefault("autocomplete", "email")
         self.fields["password1"].widget.attrs.setdefault("autocomplete", "new-password")
         self.fields["password2"].widget.attrs.setdefault("autocomplete", "new-password")
+        if not self.is_bound:
+            self.fields["plan"].initial = Restaurant.PLAN_LINK
 
     def clean_email(self):
         email = self.cleaned_data["email"].strip().lower()
@@ -81,23 +83,35 @@ class SeatedLoginForm(AuthenticationForm):
 
 
 class OnboardingRestaurantForm(forms.Form):
-    name = forms.CharField(max_length=200)
+    name = forms.CharField(label="Restaurant name", max_length=200)
     address_line1 = forms.CharField(label="Address line 1", max_length=255, required=False)
     postcode = forms.CharField(max_length=20, required=False)
-    phone = forms.CharField(max_length=20, required=False)
-    email = forms.EmailField(required=False)
+    phone = forms.CharField(label="Phone", max_length=20, required=False)
+    email = forms.EmailField(label="Booking contact email", required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["name"].widget.attrs.update({"class": "input"})
-        self.fields["address_line1"].widget.attrs.update({"class": "input"})
-        self.fields["postcode"].widget.attrs.update({"class": "input"})
-        self.fields["phone"].widget.attrs.update({"class": "input"})
-        self.fields["email"].widget.attrs.update({"class": "input"})
+        self.fields["address_line1"].widget.attrs.update(
+            {"class": "input", "placeholder": "14 Exmouth Market"}
+        )
+        self.fields["postcode"].widget.attrs.update({"class": "input", "placeholder": "EC1R 4QE"})
+        self.fields["phone"].widget.attrs.update({"class": "input", "placeholder": "020 7000 0000"})
+        self.fields["email"].widget.attrs.update(
+            {"class": "input onboarding-input-account-email", "autocomplete": "email"}
+        )
 
 
 class OnboardingTablesForm(forms.Form):
     tables_json = forms.CharField(widget=forms.HiddenInput)
+    max_party_size = forms.TypedChoiceField(
+        label="Max guests per online booking",
+        coerce=int,
+        choices=[(n, str(n)) for n in range(1, 41)],
+        initial=Restaurant._meta.get_field("max_party_size").default,
+        help_text="Anyone who needs more seats than this must ring or email — the booking page only accepts parties up to this size.",
+        widget=forms.HiddenInput(),
+    )
 
     def clean_tables_json(self):
         raw = self.cleaned_data["tables_json"]

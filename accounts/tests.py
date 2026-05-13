@@ -98,15 +98,16 @@ class OnboardingFormTests(TestCase):
         self.assertTrue(form.is_valid())
 
     def test_tables_form_requires_non_empty_list(self):
-        form = OnboardingTablesForm(data={"tables_json": "[]"})
+        form = OnboardingTablesForm(data={"tables_json": "[]", "max_party_size": "8"})
         self.assertFalse(form.is_valid())
 
     def test_tables_form_accepts_valid_json(self):
         payload = json.dumps(
             [{"local_id": "t1", "label": "A", "seats": 2, "is_combinable": False, "combine_with": []}]
         )
-        form = OnboardingTablesForm(data={"tables_json": payload})
+        form = OnboardingTablesForm(data={"tables_json": payload, "max_party_size": "12"})
         self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["max_party_size"], 12)
 
     def test_services_form_accepts_valid_json(self):
         payload = json.dumps(
@@ -173,18 +174,20 @@ class OnboardingFlowTests(TestCase):
         )
         client.post(
             reverse("accounts:onboarding_step2"),
-            {"tables_json": self.tables_payload},
+            {"tables_json": self.tables_payload, "max_party_size": "10"},
         )
         client.post(
             reverse("accounts:onboarding_step3"),
             {"services_json": self.services_payload},
         )
-        response = client.post(reverse("accounts:onboarding_step4"), {})
+        response = client.post(reverse("accounts:onboarding_step4"), {"finish_action": "draft"})
         self.assertEqual(response.status_code, 302)
 
         restaurant = Restaurant.objects.get(owner=user)
         self.assertEqual(restaurant.name, "The Bistro")
         self.assertEqual(restaurant.slug, "the-bistro")
+        self.assertEqual(restaurant.max_party_size, 10)
+        self.assertFalse(restaurant.booking_link_published)
         self.assertTrue(restaurant.subscription_active)
         self.assertEqual(restaurant.tables.count(), 1)
         self.assertEqual(restaurant.services.count(), 1)

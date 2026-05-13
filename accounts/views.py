@@ -21,6 +21,30 @@ from restaurants.models import Service, Table
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
+ONBOARDING_SIDEBAR_STEPS = [
+    {"num": 1, "title": "Restaurant details", "desc": "Name, address, contact"},
+    {"num": 2, "title": "Tables", "desc": "Covers, layout, turn times"},
+    {"num": 3, "title": "Services", "desc": "Lunch, dinner, and when you're open"},
+    {"num": 4, "title": "Go live", "desc": "Your booking page, ready to share"},
+]
+
+
+SIGNUP_PLAN_CARDS = [
+    {
+        "value": Restaurant.PLAN_LINK,
+        "title": "Booking link",
+        "price": "£50",
+        "desc": "A hosted page you can share anywhere",
+    },
+    {
+        "value": Restaurant.PLAN_WIDGET,
+        "title": "Embedded widget",
+        "price": "£60",
+        "desc": "Bookings built into your own website",
+    },
+]
+
+
 def signup(request):
     if request.method == "POST":
         form = SignupForm(request.POST)
@@ -35,7 +59,11 @@ def signup(request):
             return redirect("accounts:onboarding_step1")
     else:
         form = SignupForm()
-    return render(request, "accounts/signup.html", {"form": form})
+    return render(
+        request,
+        "accounts/signup.html",
+        {"form": form, "signup_plan_cards": SIGNUP_PLAN_CARDS},
+    )
 
 
 def _get_onboarding_data(request):
@@ -56,17 +84,21 @@ def onboarding_step1(request):
     name_guess = _onboarding_name_default(request.user)
     initial = {
         "name": name_guess,
-        "owner": request.user,
+        "email": (request.user.email or "").strip(),
     }
     if request.method == "POST":
-        form = OnboardingRestaurantForm(request.POST, initial={"owner": request.user})
+        form = OnboardingRestaurantForm(request.POST)
         if form.is_valid():
             data["restaurant"] = form.cleaned_data
             request.session["onboarding"] = data
             return redirect("accounts:onboarding_step2")
     else:
         form = OnboardingRestaurantForm(initial=initial)
-    return render(request, "accounts/onboarding_step1.html", {"form": form, "step": 1})
+    return render(
+        request,
+        "accounts/onboarding_step1.html",
+        {"form": form, "step": 1, "onboarding_sidebar_steps": ONBOARDING_SIDEBAR_STEPS},
+    )
 
 
 @login_required
@@ -78,14 +110,28 @@ def onboarding_step2(request):
         form = OnboardingTablesForm(request.POST)
         if form.is_valid():
             data["tables"] = form.cleaned_data["tables_json"]
+            data["max_party_size"] = form.cleaned_data["max_party_size"]
             request.session["onboarding"] = data
             return redirect("accounts:onboarding_step3")
     else:
-        form = OnboardingTablesForm(initial={"tables_json": json.dumps(data.get("tables", []))})
+        form = OnboardingTablesForm(
+            initial={
+                "tables_json": json.dumps(data.get("tables", [])),
+                "max_party_size": data.get(
+                    "max_party_size",
+                    Restaurant._meta.get_field("max_party_size").default,
+                ),
+            }
+        )
     return render(
         request,
         "accounts/onboarding_step2.html",
-        {"form": form, "step": 2, "table_count_options": range(1, 25)},
+        {
+            "form": form,
+            "step": 2,
+            "table_count_options": range(1, 25),
+            "onboarding_sidebar_steps": ONBOARDING_SIDEBAR_STEPS,
+        },
     )
 
 
@@ -102,7 +148,11 @@ def onboarding_step3(request):
             return redirect("accounts:onboarding_step4")
     else:
         form = OnboardingServicesForm(initial={"services_json": json.dumps(data.get("services", []))})
-    return render(request, "accounts/onboarding_step3.html", {"form": form, "step": 3})
+    return render(
+        request,
+        "accounts/onboarding_step3.html",
+        {"form": form, "step": 3, "onboarding_sidebar_steps": ONBOARDING_SIDEBAR_STEPS},
+    )
 
 
 @login_required
@@ -113,6 +163,7 @@ def onboarding_step4(request):
     if request.method == "POST":
         details = data["restaurant"]
         stripe_configured = bool(settings.STRIPE_SECRET_KEY)
+        want_publish = request.POST.get("finish_action") == "publish"
         existing = Restaurant.objects.filter(owner=request.user).first()
         slug = Restaurant.alloc_unique_slug(details["name"], exclude_pk=existing.pk if existing else None)
         restaurant, _ = Restaurant.objects.update_or_create(
@@ -125,6 +176,10 @@ def onboarding_step4(request):
                 "phone": details.get("phone", ""),
                 "email": details.get("email", ""),
                 "plan": data.get("plan", Restaurant.PLAN_LINK),
+                "max_party_size": int(
+                    data.get("max_party_size", Restaurant._meta.get_field("max_party_size").default)
+                ),
+                "booking_link_published": want_publish,
                 # Booking pages require an active subscription; without Stripe (local dev) skip paywall.
                 "subscription_active": not stripe_configured,
             },
@@ -189,7 +244,12 @@ def onboarding_step4(request):
     return render(
         request,
         "accounts/onboarding_step4.html",
-        {"step": 4, "data": data, "preview_booking_slug": preview_booking_slug},
+        {
+            "step": 4,
+            "data": data,
+            "preview_booking_slug": preview_booking_slug,
+            "onboarding_sidebar_steps": ONBOARDING_SIDEBAR_STEPS,
+        },
     )
 
 

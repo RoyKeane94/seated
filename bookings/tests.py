@@ -106,7 +106,14 @@ class AvailabilityEngineTests(TestCase):
 class BookingFlowTests(TestCase):
     def setUp(self):
         owner = User.objects.create_user("owner@test.com", "owner@test.com", "pass")
-        self.restaurant = Restaurant.objects.create(owner=owner, name="Chez", slug="chez", subscription_active=True, max_party_size=6)
+        self.restaurant = Restaurant.objects.create(
+            owner=owner,
+            name="Chez",
+            slug="chez",
+            subscription_active=True,
+            booking_link_published=True,
+            max_party_size=6,
+        )
         self.service = Service.objects.create(
             restaurant=self.restaurant,
             name="Dinner",
@@ -277,6 +284,35 @@ class BookingPublicPageTests(TestCase):
         body = response.json()
         self.assertEqual(body.get("error"), "restaurant_not_live")
 
+    def test_booking_page_503_when_booking_link_unpublished(self):
+        owner = User.objects.create_user("pub@test.com", "pub@test.com", "pass")
+        Restaurant.objects.create(
+            owner=owner,
+            name="Draft Bistro",
+            slug="draft-bistro",
+            subscription_active=True,
+            booking_link_published=False,
+        )
+        response = self.client.get(reverse("bookings:booking_page", kwargs={"slug": "draft-bistro"}))
+        self.assertEqual(response.status_code, 503)
+        self.assertContains(response, "published its booking link", status_code=503)
+
+    def test_widget_api_503_when_booking_link_unpublished(self):
+        owner = User.objects.create_user("wp@test.com", "wp@test.com", "pass")
+        Restaurant.objects.create(
+            owner=owner,
+            name="Draft Widget",
+            slug="draft-widget",
+            subscription_active=True,
+            booking_link_published=False,
+        )
+        response = self.client.get(
+            reverse("bookings:widget_api", kwargs={"slug": "draft-widget"}),
+            {"date": str(date.today()), "party": 2},
+        )
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json().get("error"), "booking_link_not_published")
+
     def test_widget_api_returns_slots_when_active(self):
         owner = User.objects.create_user("a@test.com", "a@test.com", "pass")
         restaurant = Restaurant.objects.create(
@@ -284,6 +320,7 @@ class BookingPublicPageTests(TestCase):
             name="Open Cafe",
             slug="open-cafe",
             subscription_active=True,
+            booking_link_published=True,
         )
         Service.objects.create(
             restaurant=restaurant,
@@ -321,11 +358,28 @@ class BookingApiTests(TestCase):
         )
         self.assertEqual(response.status_code, 503)
 
+    def test_booking_api_rejects_unpublished_restaurant(self):
+        owner = User.objects.create_user("unpub@test.com", "unpub@test.com", "pass")
+        Restaurant.objects.create(
+            owner=owner,
+            name="Unpublished Cafe",
+            slug="unpublished-cafe",
+            subscription_active=True,
+            booking_link_published=False,
+        )
+        response = self.client.post(
+            reverse("bookings:booking_api", kwargs={"slug": "unpublished-cafe"}),
+            data=json.dumps({}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json().get("error"), "booking_link_not_published")
+
 
 class BuildPayloadTests(TestCase):
     def test_build_restaurant_payload_includes_services_tables_bookings(self):
         owner = User.objects.create_user("pay@test.com", "pay@test.com", "pass")
-        restaurant = Restaurant.objects.create(owner=owner, name="P", slug="p", subscription_active=True)
+        restaurant = Restaurant.objects.create(owner=owner, name="P", slug="p", subscription_active=True, booking_link_published=True)
         Service.objects.create(
             restaurant=restaurant,
             name="Brunch",
@@ -346,7 +400,7 @@ class BuildPayloadTests(TestCase):
 class PickServiceTests(TestCase):
     def test_pick_service_finds_matching_slot(self):
         owner = User.objects.create_user("pick@test.com", "pick@test.com", "pass")
-        restaurant = Restaurant.objects.create(owner=owner, name="Q", slug="q", subscription_active=True)
+        restaurant = Restaurant.objects.create(owner=owner, name="Q", slug="q", subscription_active=True, booking_link_published=True)
         svc = Service.objects.create(
             restaurant=restaurant,
             name="Dinner",
@@ -381,6 +435,7 @@ class BookingSuccessTests(TestCase):
             name="S",
             slug="succ-rest",
             subscription_active=True,
+            booking_link_published=True,
         )
         response = self.client.get(
             reverse(

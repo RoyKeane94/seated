@@ -25,6 +25,10 @@ class Restaurant(models.Model):
     stripe_customer_id = models.CharField(max_length=100, blank=True)
     stripe_subscription_id = models.CharField(max_length=100, blank=True)
     subscription_active = models.BooleanField(default=False)
+    booking_link_published = models.BooleanField(
+        default=False,
+        help_text="When False, guests cannot book via the public URL even if billing is active.",
+    )
 
     booking_confirmation_message = models.TextField(
         blank=True,

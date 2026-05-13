@@ -1,25 +1,57 @@
 {% extends "base.html" %}
-{% block title %}Setup step 4 - Seated{% endblock %}
+{% block title %}Review · Restaurant setup{% endblock %}
+{% block body_extra_class %}page-onboarding-split{% endblock %}
+
+{% block nav %}
+{# Full-height split layout; wordmark lives in the promo column. #}
+{% endblock %}
+
 {% block content %}
-<section class="receipt">
-  <div class="receipt-inner">
-    <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-seated-ink-light">Step {{ step }} of 4</p>
-    <h1 class="mt-2 text-2xl font-bold text-seated-ink">Review and go live</h1>
-    <hr class="my-6 border-0 border-t border-seated-rule" />
-    <div class="space-y-2 text-sm text-seated-ink-mid">
-      <p><span class="text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink-light">Booking link</span><br />
-        <span class="font-mono text-seated-blue">{{ request.scheme }}://{{ request.get_host }}/book/{{ preview_booking_slug }}/</span>
-      </p>
-      <p class="pt-2 text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink-light">Embed code</p>
-      <pre class="max-h-40 overflow-auto border border-seated-rule-dark bg-seated-cream p-3 font-mono text-[11px] text-seated-ink">&lt;script src="{{ request.scheme }}://{{ request.get_host }}/static/js/widget.js" data-restaurant="{{ preview_booking_slug }}"&gt;&lt;/script&gt;</pre>
-    </div>
-    <form method="post" class="form-stack mt-8">
-      {% csrf_token %}
-      <div class="flex flex-wrap items-center justify-between gap-4 border-t border-seated-rule pt-6">
-        <a href="{% url 'accounts:onboarding_step3' %}" class="text-[11px] font-bold uppercase tracking-navlink text-seated-ink-light no-underline transition-colors hover:text-seated-ink">← Back</a>
-        <button class="btn-primary" type="submit">Finish and start billing</button>
+<div class="onboarding-split-shell flex min-h-[100dvh] flex-col bg-seated-blue lg:flex-row">
+  {% include "includes/onboarding_split_sidebar.html" with step=step steps=onboarding_sidebar_steps %}
+
+  <div
+    class="flex flex-1 flex-col justify-center bg-white px-6 py-10 md:px-10 lg:py-14 lg:pl-14 lg:pr-16 xl:px-16"
+    id="onboarding-review-panel"
+  >
+    <div class="mx-auto w-full max-w-xl lg:mx-0">
+      <header class="mb-8 md:mb-10">
+        <p class="font-mono text-[11px] uppercase leading-relaxed tracking-[0.12em] text-seated-ink-light">
+          Step <span class="font-bold text-seated-blue">{{ step }}</span> of 4
+        </p>
+        <h2 class="mt-2 font-serif text-[26px] font-normal leading-snug tracking-tight text-seated-ink">Review your setup</h2>
+        <p class="mt-4 max-w-xl font-mono text-xs leading-relaxed text-seated-ink-light md:mt-5">
+          Your booking URL and embed snippet are reserved below. Guests can only book online after you publish — or finish without publishing and turn it on later from your dashboard.
+        </p>
+      </header>
+
+      <div class="space-y-6 border border-seated-rule-dark bg-white p-4 md:p-5">
+        <div>
+          <p class="text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink-light">Booking link</p>
+          <p class="mt-2 break-all font-mono text-sm text-seated-blue">{{ request.scheme }}://{{ request.get_host }}/book/{{ preview_booking_slug }}/</p>
+        </div>
+        <hr class="mb-8 border-0 border-t border-seated-rule md:mb-10" />
+        <div>
+          <p class="text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink-light">Embed code</p>
+          <pre class="mt-2 max-h-40 overflow-auto border border-seated-rule-dark bg-seated-cream p-3 font-mono text-[11px] leading-relaxed text-seated-ink">&lt;script src="{{ request.scheme }}://{{ request.get_host }}/static/js/widget.js" data-restaurant="{{ preview_booking_slug }}"&gt;&lt;/script&gt;</pre>
+        </div>
       </div>
-    </form>
+
+      <form method="post" class="form-stack onboarding-details-form mt-10 md:mt-11">
+        {% csrf_token %}
+        <div class="flex flex-nowrap items-center gap-3 overflow-x-auto border-t border-seated-rule pt-8 [-ms-overflow-style:none] [scrollbar-width:none] md:justify-between md:gap-4 md:pt-9 [&::-webkit-scrollbar]:hidden">
+          <a href="{% url 'accounts:onboarding_step3' %}" class="shrink-0 text-[11px] font-bold uppercase tracking-navlink text-seated-ink-light no-underline transition-colors hover:text-seated-ink">← Back</a>
+          <div class="flex shrink-0 flex-row flex-nowrap items-center gap-3 md:ml-auto">
+            <button class="btn-row px-5 py-3 text-center" type="submit" name="finish_action" value="draft">
+              Continue without publishing
+            </button>
+            <button class="btn-primary px-6 py-3 text-center" type="submit" name="finish_action" value="publish">
+              Publish booking link
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
   </div>
-</section>
+</div>
 {% endblock %}

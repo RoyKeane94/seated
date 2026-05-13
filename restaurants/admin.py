@@ -15,9 +15,9 @@ class ServiceInline(admin.TabularInline):
 
 @admin.register(Restaurant)
 class RestaurantAdmin(admin.ModelAdmin):
-    list_display = ("name", "owner", "plan", "subscription_active", "created_at")
+    list_display = ("name", "owner", "plan", "subscription_active", "booking_link_published", "created_at")
     search_fields = ("name", "slug", "owner__username", "owner__email")
-    list_filter = ("plan", "subscription_active")
+    list_filter = ("plan", "subscription_active", "booking_link_published")
     inlines = [TableInline, ServiceInline]
 
 

@@ -1,0 +1,17 @@
+{# expects: step (int 1–4) #}
+<div class="mb-8 md:mb-10">
+  <p class="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-seated-ink-light">Onboarding</p>
+  <div
+    class="flex gap-1.5"
+    role="progressbar"
+    aria-valuenow="{{ step }}"
+    aria-valuemin="1"
+    aria-valuemax="4"
+    aria-label="Onboarding step {{ step }} of 4"
+  >
+    <span class="h-1 flex-1 {% if step >= 1 %}bg-seated-blue{% else %}bg-seated-rule{% endif %}"></span>
+    <span class="h-1 flex-1 {% if step >= 2 %}bg-seated-blue{% else %}bg-seated-rule{% endif %}"></span>
+    <span class="h-1 flex-1 {% if step >= 3 %}bg-seated-blue{% else %}bg-seated-rule{% endif %}"></span>
+    <span class="h-1 flex-1 {% if step >= 4 %}bg-seated-blue{% else %}bg-seated-rule{% endif %}"></span>
+  </div>
+</div>

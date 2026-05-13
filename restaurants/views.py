@@ -179,6 +179,17 @@ def update_booking_status(request, pk, status):
 
 
 @login_required
+@require_POST
+def publish_booking_link(request):
+    restaurant = get_object_or_404(Restaurant, owner=request.user)
+    restaurant.booking_link_published = True
+    restaurant.save(update_fields=["booking_link_published"])
+    invalidate_slots_cache(restaurant.slug)
+    messages.success(request, "Your booking link is live — guests can book online.")
+    return redirect("restaurants:dashboard")
+
+
+@login_required
 def billing_portal(request):
     restaurant = get_object_or_404(Restaurant, owner=request.user)
     if not settings.STRIPE_SECRET_KEY or not restaurant.stripe_customer_id:

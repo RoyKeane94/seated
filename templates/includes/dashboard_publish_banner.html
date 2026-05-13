@@ -1,0 +1,11 @@
+{% if restaurant.subscription_active and not restaurant.booking_link_published %}
+<div class="mb-6 border border-seated-rule-dark bg-seated-cream px-4 py-4 md:mb-8">
+  <p class="font-mono text-sm leading-relaxed text-seated-ink-mid">
+    Your booking link is not accepting reservations yet. Publish when you’re ready for guests to book online.
+  </p>
+  <form method="post" action="{% url 'restaurants:publish_booking_link' %}" class="mt-4 inline-block">
+    {% csrf_token %}
+    <button type="submit" class="btn-primary">Publish booking link</button>
+  </form>
+</div>
+{% endif %}

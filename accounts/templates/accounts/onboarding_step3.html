@@ -1,24 +1,51 @@
 {% extends "base.html" %}
-{% block title %}Setup step 3 - Seated{% endblock %}
+{% block title %}Services · Restaurant setup{% endblock %}
+{% block body_extra_class %}page-onboarding-split{% endblock %}
+
+{% block nav %}
+{# Full-height split layout; wordmark lives in the promo column. #}
+{% endblock %}
+
 {% block content %}
-<section class="receipt">
-  <div class="receipt-inner">
-    <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-seated-ink-light">Step {{ step }} of 4</p>
-    <h1 class="mt-2 text-2xl font-bold text-seated-ink">Your services</h1>
-    <p class="mt-2 text-sm text-seated-ink-mid">Add opening hours, turn times, and sitting mode for each service.</p>
-    <hr class="my-6 border-0 border-t border-seated-rule" />
-    <form method="post" id="services-form" class="form-stack">
-      {% csrf_token %}
-      {{ form.services_json }}
-      <div id="service-list" class="space-y-3"></div>
-      <button type="button" id="add-service" class="btn-row mt-2">+ Add service</button>
-      <div class="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-seated-rule pt-6">
-        <a href="{% url 'accounts:onboarding_step2' %}" class="text-[11px] font-bold uppercase tracking-navlink text-seated-ink-light no-underline transition-colors hover:text-seated-ink">← Back</a>
-        <button class="btn-primary" type="submit">Next: review</button>
-      </div>
-    </form>
+<div class="onboarding-split-shell flex min-h-[100dvh] flex-col bg-seated-blue lg:flex-row">
+  {% include "includes/onboarding_split_sidebar.html" with step=step steps=onboarding_sidebar_steps %}
+
+  <div
+    class="flex flex-1 flex-col justify-center bg-white px-6 py-10 md:px-10 lg:py-14 lg:pl-14 lg:pr-16 xl:px-16"
+    id="onboarding-services-panel"
+  >
+    <div class="mx-auto w-full max-w-xl lg:mx-0">
+      <header class="mb-6 md:mb-8">
+        <p class="font-mono text-[11px] uppercase leading-relaxed tracking-[0.12em] text-seated-ink-light">
+          Step <span class="font-bold text-seated-blue">{{ step }}</span> of 4
+        </p>
+        <h2 class="mt-2 font-serif text-[26px] font-normal leading-snug tracking-tight text-seated-ink">Services</h2>
+        <p class="mt-4 max-w-xl font-mono text-xs leading-relaxed text-seated-ink-light md:mt-5">
+          You don’t need everything perfect now — you can add or edit services anytime from your dashboard settings.
+        </p>
+      </header>
+
+      <form method="post" id="services-form" class="form-stack onboarding-details-form">
+        {% csrf_token %}
+        {{ form.services_json }}
+
+        {% if form.non_field_errors %}
+        <div class="mb-6 border border-seated-rule-dark bg-seated-cream px-3 py-2 text-sm text-seated-ink">
+          {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div id="service-list" class="space-y-3"></div>
+        <button type="button" id="add-service" class="btn-row mt-4">+ Add service</button>
+
+        <div class="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-seated-rule pt-8 md:mt-11 md:pt-9">
+          <a href="{% url 'accounts:onboarding_step2' %}" class="text-[11px] font-bold uppercase tracking-navlink text-seated-ink-light no-underline transition-colors hover:text-seated-ink">← Back</a>
+          <button class="btn-primary" type="submit">Next: review →</button>
+        </div>
+      </form>
+    </div>
   </div>
-</section>
+</div>
 <script>
 (() => {
   const CHEVRON =
@@ -91,7 +118,8 @@
           syncPanelActive();
           host.classList.remove("is-open");
           trigger.setAttribute("aria-expanded", "false");
-          onChange(valueKind === "number" ? Number(current) : current);
+          const out = valueKind === "number" ? Number(current) : current;
+          onChange(out);
         });
       });
       syncPanelActive();
@@ -169,38 +197,52 @@
     });
   }
 
+  function syncModeHints(card) {
+    const mode = card._modeDd.getValue();
+    const flex = card.querySelector(".service-mode-hint-flex");
+    const fixed = card.querySelector(".service-mode-hint-fixed");
+    flex.style.display = mode === "flexible" ? "block" : "none";
+    fixed.style.display = mode === "fixed" ? "block" : "none";
+  }
+
   const addRow = (preset = null) => {
     const card = document.createElement("div");
     card.className = "space-y-3 border border-seated-rule-dark bg-white p-4";
     card.innerHTML = `
       <div class="form-field">
-        <label class="mb-1 block text-[10px] font-bold uppercase text-seated-ink-light">Name</label>
+        <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.08em] text-seated-ink">Name</label>
         <input class="input service-name" value="Evening" />
       </div>
       <div class="form-field">
-        <span class="mb-1 block text-[10px] font-bold uppercase text-seated-ink-light">Days</span>
+        <span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.08em] text-seated-ink">Days</span>
         <div class="service-days-row flex flex-wrap gap-x-4 gap-y-2 font-mono text-sm text-seated-ink">${weekdayChecksHtml}</div>
       </div>
       <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <div class="form-field">
-          <label class="mb-1 block text-[10px] font-bold uppercase text-seated-ink-light">Start</label>
+          <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.08em] text-seated-ink">Start</label>
           <input type="time" class="input service-start" value="18:00" />
         </div>
         <div class="form-field">
-          <label class="mb-1 block text-[10px] font-bold uppercase text-seated-ink-light">End</label>
+          <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.08em] text-seated-ink">End</label>
           <input type="time" class="input service-end" value="21:00" />
         </div>
       </div>
       <div class="form-field">
-        <label class="mb-1 block text-[10px] font-bold uppercase text-seated-ink-light">Turn (minutes)</label>
+        <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.08em] text-seated-ink">Duration (minutes)</label>
         <input type="number" class="input service-turn" value="90" />
       </div>
       <div class="form-field">
-        <span class="mb-1 block text-[10px] font-bold uppercase text-seated-ink-light">Mode</span>
+        <span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.08em] text-seated-ink">Mode</span>
         <div class="seated-dropdown service-mode-dd"></div>
+        <p class="service-mode-hint-flex mt-2 font-mono text-xs leading-relaxed text-seated-ink-light">
+          Customers can choose any time.
+        </p>
+        <p class="service-mode-hint-fixed mt-2 font-mono text-xs leading-relaxed text-seated-ink-light">
+          Customers can only choose between certain times (i.e. 18:30 and 20:00).
+        </p>
       </div>
       <div class="form-field">
-        <label class="mb-1 block text-[10px] font-bold uppercase text-seated-ink-light">Fixed slots (comma HH:MM)</label>
+        <label class="mb-1 block text-[10px] font-bold uppercase tracking-[0.08em] text-seated-ink">Fixed slots (comma HH:MM)</label>
         <input class="input service-fixed" value="" placeholder="18:30, 21:00" />
       </div>
     `;
@@ -209,7 +251,7 @@
     const modeHost = card.querySelector(".service-mode-dd");
     const modeInitial =
       preset && preset.sitting_mode ? preset.sitting_mode : "flexible";
-    card._modeDd = mountSeatedDropdown(modeHost, modeChoices, modeInitial, () => {}, "string");
+    card._modeDd = mountSeatedDropdown(modeHost, modeChoices, modeInitial, () => syncModeHints(card), "string");
 
     if (preset) {
       card.querySelector(".service-name").value = preset.name || "Evening";
@@ -221,6 +263,7 @@
       card.querySelector(".service-fixed").value = (preset.fixed_sitting_times || []).join(", ");
     }
     setServiceDaysFromPreset(card, preset);
+    syncModeHints(card);
   };
 
   document.getElementById("add-service").addEventListener("click", () => addRow(null));

@@ -55,6 +55,14 @@ class DashboardAccessTests(TestCase):
         response = self.client.get(reverse("restaurants:dashboard"))
         self.assertEqual(response.status_code, 200)
 
+    def test_publish_booking_link_sets_published(self):
+        self.client.login(username="dash@test.com", password="pass")
+        self.assertFalse(self.restaurant.booking_link_published)
+        response = self.client.post(reverse("restaurants:publish_booking_link"))
+        self.assertEqual(response.status_code, 302)
+        self.restaurant.refresh_from_db()
+        self.assertTrue(self.restaurant.booking_link_published)
+
     def test_settings_shows_booking_link(self):
         self.client.login(username="dash@test.com", password="pass")
         response = self.client.get(reverse("restaurants:settings"))

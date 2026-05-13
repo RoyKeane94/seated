@@ -1,32 +1,147 @@
 {% extends "base.html" %}
-{% block title %}Signup - Seated{% endblock %}
+{% block title %}Get started · Seated{% endblock %}
+{% block body_extra_class %}page-signup{% endblock %}
 
 {% block nav %}
-<nav class="sticky top-0 z-[100] flex w-full items-center border-b-2 border-seated-ink bg-seated-paper px-6 py-5 md:px-14">
-  <a href="/" class="font-mono text-[15px] font-bold tracking-[0.14em] text-seated-ink no-underline">SEATED<span class="text-seated-blue-mid">.</span></a>
-</nav>
+{# Split layout carries the primary wordmark in the left panel; omit global navigation. #}
 {% endblock %}
 
 {% block content %}
-<section class="receipt receipt-signup">
-  <div class="receipt-inner">
-    <h1 class="text-2xl font-bold tracking-tight text-seated-ink">Restaurant signup</h1>
-
-    <p class="mt-5 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-seated-ink-mid">Trusted by independent restaurants across London</p>
-    <p class="mt-2 text-center font-mono text-[11px] leading-relaxed text-seated-ink-light">
-      £50/month · No contract · Cancel anytime
+<div class="signup-shell flex min-h-[100dvh] flex-col bg-seated-blue lg:flex-row">
+  <aside
+    class="signup-promo relative flex shrink-0 flex-col justify-between bg-seated-blue px-6 py-10 text-white md:px-10 md:py-11 lg:w-[42%] lg:min-h-[100dvh] lg:px-10 lg:py-11 xl:px-12"
+    aria-label="About Seated"
+  >
+    <a
+      href="{% url 'home' %}"
+      class="font-mono text-[15px] font-bold uppercase tracking-[0.14em] text-white no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-seated-blue"
+      >SEATED<span class="text-white/75">.</span></a>
+    <div class="flex flex-1 flex-col justify-center py-10 lg:py-14">
+      <h1 class="font-serif text-3xl leading-[1.1] tracking-[-0.01em] text-white md:text-4xl xl:text-[2.75rem]">
+        Bookings sorted.<br />
+        Your way.
+      </h1>
+      <p class="mt-6 max-w-[20rem] font-mono text-[13px] leading-relaxed text-white/65">
+        Built for independent restaurants. Flat monthly fee — no commissions, no contracts, no surprises.
+      </p>
+      <ul class="mt-10 grid list-none gap-3.5 p-0 font-mono text-xs leading-snug tracking-[0.02em] text-white/60 md:gap-4">
+        <li class="flex items-center gap-3">
+          <span class="inline-block size-1 shrink-0 rounded-full bg-white/35" aria-hidden="true"></span>
+          Your booking page live in minutes
+        </li>
+        <li class="flex items-center gap-3">
+          <span class="inline-block size-1 shrink-0 rounded-full bg-white/35" aria-hidden="true"></span>
+          Embed directly on your own website
+        </li>
+        <li class="flex items-center gap-3">
+          <span class="inline-block size-1 shrink-0 rounded-full bg-white/35" aria-hidden="true"></span>
+          Cancel any time, no questions asked
+        </li>
+      </ul>
+    </div>
+    <p class="font-mono text-[10px] uppercase leading-relaxed tracking-[0.1em] text-white/35">
+      Trusted by independent<br />
+      restaurants across London
     </p>
+  </aside>
 
-    <hr class="my-6 border-0 border-t border-seated-rule" />
+  <div
+    class="flex flex-1 flex-col justify-center bg-white px-6 py-10 md:px-10 lg:py-14 lg:pl-14 lg:pr-16 xl:px-16"
+    id="signup-form"
+  >
+    <div class="receipt-inner mx-auto w-full max-w-signup lg:mx-0 lg:max-w-md lg:py-2 xl:py-6">
+      <p class="mb-8 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-seated-ink-light md:mb-10">
+        Create your account
+      </p>
 
-    <form method="post" class="form-stack mt-2">
-      {% csrf_token %}
-      {% include "includes/form_fields.html" with form=form %}
-      <div class="mt-8 border-t border-seated-rule pt-6">
-        <p class="mb-4 text-center text-[10px] font-bold uppercase tracking-[0.14em] text-seated-ink-light">Step 1 of 4 — Account</p>
-        <button class="btn-primary w-full text-center sm:w-auto" type="submit">Continue to setup</button>
-      </div>
-    </form>
+      <form method="post" action="{% url 'accounts:signup' %}" class="form-stack">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="mb-4 border border-seated-rule-dark bg-seated-cream px-3 py-2 text-sm text-seated-ink">
+          {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div class="form-field mb-5 md:mb-6">
+          <label
+            class="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink"
+            for="{{ form.email.id_for_label }}"
+          >{{ form.email.label }}</label>
+          {{ form.email }}
+          {% if form.email.help_text %}<p class="helptext">{{ form.email.help_text }}</p>{% endif %}
+          {% if form.email.errors %}{{ form.email.errors }}{% endif %}
+        </div>
+
+        <div class="form-field mb-5 md:mb-6">
+          <label
+            class="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink"
+            for="{{ form.password1.id_for_label }}"
+          >{{ form.password1.label }}</label>
+          {{ form.password1 }}
+          {% if form.password1.help_text %}<p class="helptext">{{ form.password1.help_text }}</p>{% endif %}
+          {% if form.password1.errors %}{{ form.password1.errors }}{% endif %}
+        </div>
+
+        <div class="form-field mb-8 md:mb-10">
+          <label
+            class="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink"
+            for="{{ form.password2.id_for_label }}"
+          >{{ form.password2.label }}</label>
+          {{ form.password2 }}
+          {% if form.password2.help_text %}<p class="helptext">{{ form.password2.help_text }}</p>{% endif %}
+          {% if form.password2.errors %}{{ form.password2.errors }}{% endif %}
+        </div>
+
+        <hr class="mb-8 border-0 border-t border-seated-rule md:mb-10" />
+
+        <div class="form-field mb-6 md:mb-8">
+          <span
+            id="signup-plan-heading"
+            class="mb-3.5 block text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink"
+          >{{ form.plan.label }}</span>
+          {% with pid=form.plan.html_name pv=form.plan.value %}
+          <ul
+            class="plan-choice-list signup-plan-list"
+            role="list"
+            aria-labelledby="signup-plan-heading"
+          >
+            {% for meta in signup_plan_cards %}
+            <li class="m-0 flex min-w-0 p-0">
+              <label class="signup-plan-option" for="id_plan_{{ forloop.counter0 }}">
+                <input
+                  type="radio"
+                  name="{{ pid }}"
+                  value="{{ meta.value }}"
+                  id="id_plan_{{ forloop.counter0 }}"
+                  {% if pv == meta.value %}checked{% elif not pv and forloop.first %}checked{% endif %}
+                  required
+                />
+                <span class="signup-plan-option-body">
+                  <span class="signup-plan-title">{{ meta.title }}</span>
+                  <span class="signup-plan-price"
+                    ><span class="signup-plan-money font-serif">{{ meta.price }}</span
+                    ><span class="signup-plan-period">/mo</span></span
+                  >
+                  <span class="signup-plan-desc">{{ meta.desc }}</span>
+                </span>
+              </label>
+            </li>
+            {% endfor %}
+          </ul>
+          {% endwith %}
+          {% if form.plan.errors %}{{ form.plan.errors }}{% endif %}
+        </div>
+
+        <button class="btn-primary w-full px-6 py-[1.125rem] text-center" type="submit">Continue to setup →</button>
+        <p class="mt-4 text-center font-mono text-[10px] leading-relaxed text-seated-ink-light">
+          No card needed until setup is complete. By continuing you agree to our
+          <a href="#" class="text-seated-blue underline decoration-seated-rule underline-offset-[3px] transition-colors hover:text-seated-blue-mid">Terms</a>
+          and
+          <a href="#" class="text-seated-blue underline decoration-seated-rule underline-offset-[3px] transition-colors hover:text-seated-blue-mid">Privacy Policy</a>.
+        </p>
+      </form>
+    </div>
   </div>
-</section>
+</div>
 {% endblock %}

@@ -1,27 +1,64 @@
 {% extends "base.html" %}
-{% block title %}Setup step 2 - Seated{% endblock %}
+{% block title %}Tables · Restaurant setup{% endblock %}
+{% block body_extra_class %}page-onboarding-split{% endblock %}
+
+{% block nav %}
+{# Full-height split layout; wordmark lives in the promo column. #}
+{% endblock %}
+
 {% block content %}
-<section class="receipt">
-  <div class="receipt-inner">
-    <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-seated-ink-light">Step {{ step }} of 4</p>
-    <h1 class="mt-2 text-2xl font-bold text-seated-ink">Your tables</h1>
-    <p class="mt-2 text-sm text-seated-ink-mid">Set how many tables and seat counts you have.</p>
-    <hr class="my-6 border-0 border-t border-seated-rule" />
-    <form method="post" id="tables-form" class="form-stack">
-      {% csrf_token %}
-      {{ form.tables_json }}
-      <div class="form-field mb-4">
-        <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink-light" id="table-count-label">Number of tables</span>
-        <div id="table-count-wrap" class="seated-dropdown" aria-labelledby="table-count-label"></div>
-      </div>
-      <div id="table-rows" class="space-y-3"></div>
-      <div class="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-seated-rule pt-6">
-        <a href="{% url 'accounts:onboarding_step1' %}" class="text-[11px] font-bold uppercase tracking-navlink text-seated-ink-light no-underline transition-colors hover:text-seated-ink">← Back</a>
-        <button class="btn-primary" type="submit">Next: services</button>
-      </div>
-    </form>
+<div class="onboarding-split-shell flex min-h-[100dvh] flex-col bg-seated-blue lg:flex-row">
+  {% include "includes/onboarding_split_sidebar.html" with step=step steps=onboarding_sidebar_steps %}
+
+  <div
+    class="flex flex-1 flex-col justify-center bg-white px-6 py-10 md:px-10 lg:py-14 lg:pl-14 lg:pr-16 xl:px-16"
+    id="onboarding-tables-panel"
+  >
+    <div class="mx-auto w-full max-w-xl lg:mx-0">
+      <header class="mb-9 md:mb-10">
+        <p class="font-mono text-[11px] uppercase leading-relaxed tracking-[0.12em] text-seated-ink-light">
+          Step <span class="font-bold text-seated-blue">{{ step }}</span> of 4
+        </p>
+        <h2 class="mt-2 font-serif text-[26px] font-normal leading-snug tracking-tight text-seated-ink">Tables</h2>
+      </header>
+
+      <form method="post" id="tables-form" class="form-stack onboarding-details-form">
+        {% csrf_token %}
+        {{ form.tables_json }}
+
+        {% if form.non_field_errors %}
+        <div class="mb-6 border border-seated-rule-dark bg-seated-cream px-3 py-2 text-sm text-seated-ink">
+          {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div class="form-field mb-5 md:mb-6">
+          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink" id="table-count-label">Number of tables</span>
+          <div id="table-count-wrap" class="seated-dropdown" aria-labelledby="table-count-label"></div>
+        </div>
+
+        <div id="table-rows" class="space-y-3"></div>
+
+        <hr class="mb-0 mt-10 border-0 border-t border-seated-rule md:mt-12" />
+
+        <div class="form-field mb-2 mt-10 md:mb-3 md:mt-12">
+          <span class="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.08em] text-seated-ink" id="max-party-label">{{ form.max_party_size.label }}</span>
+          <div id="max-party-wrap" class="seated-dropdown" aria-labelledby="max-party-label"></div>
+          {{ form.max_party_size }}
+          {% if form.max_party_size.help_text %}
+          <p class="mt-5 max-w-[36rem] font-mono text-xs leading-relaxed text-seated-ink-light md:mt-6">{{ form.max_party_size.help_text }}</p>
+          {% endif %}
+          {% if form.max_party_size.errors %}{{ form.max_party_size.errors }}{% endif %}
+        </div>
+
+        <div class="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-seated-rule pt-8 md:mt-11 md:pt-9">
+          <a href="{% url 'accounts:onboarding_step1' %}" class="text-[11px] font-bold uppercase tracking-navlink text-seated-ink-light no-underline transition-colors hover:text-seated-ink">← Back</a>
+          <button class="btn-primary" type="submit">Next: services →</button>
+        </div>
+      </form>
+    </div>
   </div>
-</section>
+</div>
 <script>
 (() => {
   const CHEVRON =
@@ -138,6 +175,8 @@
   const countWrap = document.getElementById("table-count-wrap");
   const rows = document.getElementById("table-rows");
   const jsonField = document.querySelector("input[name='tables_json']");
+  const maxPartyHidden = document.querySelector('input[name="max_party_size"]');
+  const maxPartyWrap = document.getElementById("max-party-wrap");
   let rawInitial = [];
   try {
     rawInitial = JSON.parse(jsonField.value || "[]");
@@ -149,19 +188,32 @@
   let rowState = rawInitial.map((it) => ({
     label: String(it.label ?? ""),
     seats: Number(it.seats) || 4,
-    is_combinable: !!it.is_combinable,
   }));
 
   const tableCountValues = [{% for n in table_count_options %}{{ n }}{% if not forloop.last %},{% endif %}{% endfor %}];
   const seatValues = Array.from({ length: 12 }, (_, n) => n + 1);
+  const partyValues = Array.from({ length: 40 }, (_, n) => n + 1);
 
   let countDropdown = null;
+
+  let maxPartyInitial = Number(maxPartyHidden && maxPartyHidden.value);
+  if (!Number.isFinite(maxPartyInitial) || maxPartyInitial < 1 || maxPartyInitial > 40) maxPartyInitial = 8;
+
+  const maxPartyDd = mountSeatedDropdown(
+    maxPartyWrap,
+    partyValues,
+    maxPartyInitial,
+    (v) => {
+      maxPartyHidden.value = String(v);
+    },
+    "number"
+  );
+  maxPartyHidden.value = String(maxPartyDd.getValue());
 
   function snapshotFromDom() {
     return [...rows.children].map((row) => ({
       label: row.querySelector(".table-label").value,
       seats: row._seatsDd.getValue(),
-      is_combinable: row.querySelector(".table-combinable").checked,
     }));
   }
 
@@ -172,7 +224,6 @@
       rowState.push({
         label: `Table ${rowState.length + 1}`,
         seats: 4,
-        is_combinable: false,
       });
     }
     rowState = rowState.slice(0, count);
@@ -194,16 +245,12 @@
             <div class="seated-dropdown table-seats-dd"></div>
           </div>
         </div>
-        <label class="mt-2 flex cursor-pointer items-center gap-2 text-sm text-seated-ink-mid">
-          <input type="checkbox" class="size-4 accent-[#1B3A6B] table-combinable" /> Can be combined
-        </label>
       `;
       row.querySelector(".table-label").value = existing.label;
 
       const ddHost = row.querySelector(".table-seats-dd");
       row._seatsDd = mountSeatedDropdown(ddHost, seatValues, existing.seats, () => {}, "number");
 
-      row.querySelector(".table-combinable").checked = !!existing.is_combinable;
       rows.appendChild(row);
     }
   }
@@ -222,10 +269,11 @@
       local_id: `t${idx + 1}`,
       label: r.label,
       seats: r.seats,
-      is_combinable: r.is_combinable,
+      is_combinable: false,
       combine_with: [],
     }));
     jsonField.value = JSON.stringify(payload);
+    maxPartyHidden.value = String(maxPartyDd.getValue());
   });
 
   renderRows();
