@@ -5,34 +5,38 @@
   <header class="dashboard-toolbar">
     <div class="dashboard-toolbar-inner">
       <div class="dashboard-toolbar-setup">
-        <p class="dashboard-toolbar-label">Edit setup</p>
+        <p class="dashboard-toolbar-label uppercase">Edit setup</p>
         <div class="dashboard-toolbar-links">
           {% for s in onboarding_sidebar_steps %}
           <a
-            class="btn-row shrink-0 px-3 py-2 text-[10px] no-underline"
+            class="dashboard-toolbar-link"
             href="{% url 'restaurants:edit_onboarding_step' step=s.num %}"
-          >Step {{ s.num }} · {{ s.title }}</a>
+          >{{ s.title }}</a>
           {% endfor %}
         </div>
       </div>
       <div class="dashboard-toolbar-actions">
+        {% if restaurant.subscription_active and restaurant.booking_link_published %}
+        <span class="dashboard-tag-public-live" role="status">Taking reservations online</span>
+        {% elif restaurant.subscription_active %}
+        <span class="dashboard-tag-public-paused" role="status">Not taking reservations online yet</span>
+        {% else %}
+        <span class="dashboard-tag-public-inactive" role="status">Online reservations unavailable</span>
+        {% endif %}
         {% if restaurant.subscription_active and not restaurant.booking_link_published %}
-        <form method="post" action="{% url 'restaurants:publish_booking_link' %}">
+        <form method="post" action="{% url 'restaurants:publish_booking_link' %}" class="inline-flex">
           {% csrf_token %}
-          <button type="submit" class="btn-primary">Publish booking link</button>
+          <button type="submit" class="btn-primary flex h-11 items-center justify-center px-5">Publish booking link</button>
         </form>
         {% elif restaurant.subscription_active and restaurant.booking_link_published %}
-        <a
-          class="btn-row inline-flex h-11 items-center px-4 text-[10px] no-underline"
-          href="{{ restaurant.get_booking_url }}"
-        >View booking page</a>
+        <a class="dashboard-toolbar-cta-line" href="{{ restaurant.get_booking_url }}">View booking page</a>
         {% endif %}
       </div>
     </div>
   </header>
   <div class="dashboard-shell">
     <aside class="dashboard-sidebar">
-      <p class="text-[13px] font-bold tracking-[0.12em] text-seated-ink">seated<span class="text-seated-blue-mid">.</span></p>
+      <a href="/" class="inline-block font-mono text-[15px] font-bold tracking-[0.14em] text-seated-ink no-underline">SEATED<span class="text-seated-blue-mid">.</span></a>
       <p class="mt-1 text-xs text-seated-ink-light">{{ restaurant.name }}</p>
 
       <div class="mt-8 sm:mt-10">
@@ -74,8 +78,8 @@
     </aside>
 
     <div class="dashboard-main">
-      <div class="flex flex-col gap-4 border-b border-seated-rule pb-6 sm:flex-row sm:items-start sm:justify-between">
-        <div>
+      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-seated-rule pb-6">
+        <div class="min-w-0">
           <h1 class="text-xl font-bold text-seated-ink">
             {% if is_dashboard_today %}Today’s bookings{% else %}Bookings{% endif %}
           </h1>
@@ -85,7 +89,7 @@
         </div>
         <a
           href="/book/{{ restaurant.slug }}/"
-          class="inline-flex h-11 shrink-0 items-center justify-center border-2 border-seated-ink px-5 text-[11px] font-bold uppercase tracking-navlink text-seated-ink no-underline transition-colors hover:bg-seated-cream focus:outline-none focus:ring-2 focus:ring-seated-blue focus:ring-offset-2"
+          class="dashboard-toolbar-cta-heavy shrink-0"
         >+ Add booking</a>
       </div>
 

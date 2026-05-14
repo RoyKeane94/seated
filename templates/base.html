@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="{% static 'css/seated.css' %}">
   {% block extra_head %}{% endblock %}
 </head>
-<body class="min-h-screen bg-seated-bg bg-page-texture font-mono text-seated-ink antialiased {% block body_extra_class %}{% endblock %}">
+<body class="flex min-h-screen flex-col bg-seated-bg bg-page-texture font-mono text-seated-ink antialiased {% block body_extra_class %}{% endblock %}">
   {% if not embedded %}
   {% block nav %}
   <nav class="sticky top-0 z-[100] flex w-full flex-wrap items-center justify-between gap-4 border-b-2 border-seated-ink bg-seated-paper px-6 py-5 md:px-14">
@@ -32,6 +32,13 @@
   </nav>
   {% endblock %}
   {% endif %}
-  {% block content %}{% endblock %}
+  <main class="flex min-h-0 min-w-0 flex-1 flex-col">{% block content %}{% endblock %}</main>
+  {% if not embedded %}
+  {% block footer %}
+  <footer class="border-t-2 border-seated-ink bg-seated-paper px-6 py-5 md:px-14" role="contentinfo">
+    <a href="#" class="inline-flex min-h-6 min-w-6" aria-label="Privacy"></a>
+  </footer>
+  {% endblock %}
+  {% endif %}
 </body>
 </html>

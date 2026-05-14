@@ -117,36 +117,60 @@
   .receipt.dashboard-receipt {
     @apply my-8 max-w-[1100px];
   }
+  body.page-dashboard-full {
+    background-image: none;
+    @apply bg-seated-paper;
+  }
+  body.page-dashboard-full main {
+    @apply flex min-h-0 min-w-0 flex-1 flex-col;
+  }
   body.page-dashboard-full .receipt.dashboard-receipt {
-    @apply mx-0 mb-0 mt-0 max-w-none w-full rounded-none border-0 bg-transparent shadow-none;
+    @apply mx-0 mb-0 mt-0 flex min-h-0 w-full max-w-none flex-1 flex-col rounded-none border-0 bg-transparent shadow-none;
   }
   .dashboard-toolbar {
-    @apply border-b-2 border-seated-ink bg-seated-paper;
+    @apply shrink-0 border-b-2 border-seated-ink bg-seated-paper;
   }
   .dashboard-toolbar-inner {
-    @apply flex max-w-none flex-col gap-4 px-4 py-4 sm:flex-row sm:flex-wrap sm:items-start sm:gap-x-4 md:items-center md:px-14 md:py-5;
+    @apply flex flex-col items-stretch gap-4 px-4 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between md:px-14 md:py-4;
   }
   .dashboard-toolbar-setup {
-    @apply flex min-w-0 flex-1 flex-col gap-3 md:flex-row md:flex-wrap md:items-center;
+    @apply flex w-max max-w-full shrink-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3;
   }
   .dashboard-toolbar-label {
-    @apply shrink-0 font-mono text-[10px] font-bold uppercase tracking-section text-seated-ink-light;
+    @apply shrink-0 whitespace-nowrap font-mono text-[10px] font-bold tracking-section text-seated-ink-light;
   }
   .dashboard-toolbar-links {
-    @apply flex min-w-0 flex-wrap gap-2;
+    @apply grid w-max max-w-full grid-cols-2 gap-1.5 sm:grid-cols-4 sm:justify-items-start;
+  }
+  .dashboard-toolbar-link {
+    @apply box-border flex h-9 w-[7.5rem] shrink-0 items-center justify-center border border-seated-rule-dark bg-white px-1 py-1 text-center font-mono text-[8px] font-bold uppercase leading-tight tracking-navlink text-seated-ink-mid no-underline transition-colors hover:border-seated-blue hover:text-seated-blue sm:w-[8rem];
   }
   .dashboard-toolbar-actions {
-    @apply flex shrink-0 flex-wrap items-center gap-2 md:ml-auto;
+    @apply flex shrink-0 flex-wrap items-center justify-end gap-x-2 gap-y-2 sm:ml-auto sm:flex-nowrap md:gap-x-3;
+  }
+  .dashboard-tag-public-live {
+    @apply inline-flex max-w-[12rem] items-center whitespace-normal rounded-full border border-seated-blue bg-seated-blue-pale px-2.5 py-1.5 text-center font-mono text-[10px] font-semibold leading-snug text-seated-blue sm:max-w-[14rem];
+  }
+  .dashboard-tag-public-paused {
+    @apply inline-flex max-w-[12rem] items-center whitespace-normal rounded-full border border-seated-rule-dark bg-seated-cream px-2.5 py-1.5 text-center font-mono text-[10px] font-semibold leading-snug text-seated-ink-mid sm:max-w-[14rem];
+  }
+  .dashboard-tag-public-inactive {
+    @apply inline-flex max-w-[13rem] items-center whitespace-normal rounded-full bg-seated-rule/30 px-2.5 py-1.5 text-center font-mono text-[10px] font-semibold leading-snug text-seated-ink-light sm:max-w-none;
+  }
+  .dashboard-toolbar-cta-heavy {
+    @apply inline-flex h-11 shrink-0 items-center justify-center border-2 border-seated-ink px-4 font-mono text-[10px] font-bold uppercase tracking-navlink text-seated-ink no-underline transition-colors hover:bg-seated-cream focus:outline-none focus:ring-2 focus:ring-seated-blue focus:ring-offset-2 sm:px-5;
+  }
+  .dashboard-toolbar-cta-line {
+    @apply btn-row inline-flex h-11 shrink-0 items-center justify-center px-4 text-[10px] no-underline;
   }
   body.page-dashboard-full .dashboard-shell {
-    /* Flex avoids grid min-width quirks; sidebar + ledger from ~640px up */
-    @apply flex min-h-[min(480px,72vh)] flex-col sm:flex-row sm:items-stretch;
+    @apply flex min-h-0 flex-1 flex-col sm:flex-row sm:items-stretch;
   }
   .dashboard-sidebar {
-    @apply border-b border-seated-rule bg-seated-paper-warm px-5 py-7 sm:w-[272px] sm:max-w-[36vw] sm:shrink-0 sm:border-b-0 sm:border-r sm:border-seated-rule sm:py-10;
+    @apply border-b border-seated-rule bg-seated-paper-warm px-5 py-7 sm:w-[272px] sm:max-w-[36vw] sm:shrink-0 sm:border-b-0 sm:border-r sm:border-seated-rule sm:py-10 md:pl-14 md:pr-8;
   }
   .dashboard-main {
-    @apply min-w-0 flex-1 bg-seated-paper px-5 py-8 sm:px-8 sm:py-10;
+    @apply flex min-h-0 flex-1 flex-col bg-seated-paper px-5 py-8 sm:px-8 sm:py-10 md:px-14;
   }
   .dashboard-date-nav-btn {
     @apply inline-flex size-11 shrink-0 items-center justify-center border border-seated-rule-dark bg-white font-mono text-seated-ink no-underline transition-colors hover:border-seated-ink hover:bg-seated-cream focus:outline-none focus:ring-2 focus:ring-seated-blue focus:ring-offset-2;
