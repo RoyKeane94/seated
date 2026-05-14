@@ -6,6 +6,11 @@ app_name = "restaurants"
 
 urlpatterns = [
     path("dashboard/", views.DashboardTodayView.as_view(), name="dashboard"),
+    path(
+        "dashboard/setup/step/<int:step>/",
+        views.edit_onboarding_step,
+        name="edit_onboarding_step",
+    ),
     path("dashboard/publish-booking/", views.publish_booking_link, name="publish_booking_link"),
     path("dashboard/upcoming/", views.DashboardUpcomingView.as_view(), name="dashboard_upcoming"),
     path("dashboard/booking/<int:pk>/", views.BookingDetailView.as_view(), name="booking_detail"),

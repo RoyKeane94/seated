@@ -1,39 +1,178 @@
 {% extends "base.html" %}
+{% block body_extra_class %}page-dashboard-full{% endblock %}
 {% block content %}
-<section class="receipt">
-  <div class="receipt-inner">
-    {% include "includes/dashboard_publish_banner.html" %}
-    <h1 class="text-2xl font-bold text-seated-ink">{{ restaurant.name }}</h1>
-    <p class="mt-1 text-sm text-seated-ink-mid">Today — {{ today|date:"l j F Y" }}</p>
-    <div class="mt-4 space-y-1 text-sm text-seated-ink-mid">
-      {% for s in summaries %}
-      <p><span class="font-bold text-seated-ink">{{ s.service.name|upper }}</span> · {{ s.booked }} booked / {{ s.remaining }} remain</p>
-      {% empty %}
-      <p class="text-seated-ink-light">No active services.</p>
-      {% endfor %}
-    </div>
-  </div>
-  <div class="tear"></div>
-  <div class="receipt-inner receipt-cream">
-    <p class="mb-3 text-[10px] font-bold uppercase tracking-section text-seated-ink-light">Today's bookings</p>
-    <div class="space-y-3">
-      {% for booking in bookings %}
-      <div class="border-b border-dashed border-seated-rule pb-3">
-        <p class="font-bold text-seated-ink">{{ booking.time|time:"H:i" }} {{ booking.guest_name }} × {{ booking.party_size }}</p>
-        <p class="text-sm text-seated-ink-mid">{{ booking.table.label|default:"Unassigned" }}{% if booking.notes %} · {{ booking.notes }}{% endif %}</p>
-        <p class="mb-2 text-xs uppercase tracking-navlink text-seated-ink-light">{{ booking.status }}</p>
-        <div class="flex flex-wrap gap-2">
-          <form method="post" action="{% url 'restaurants:booking_status' booking.id 'no_show' %}">{% csrf_token %}<button class="btn-row" type="submit">No-show</button></form>
-          <form method="post" action="{% url 'restaurants:booking_status' booking.id 'cancel' %}">{% csrf_token %}<button class="btn-row" type="submit">Cancel</button></form>
-          <form method="post" action="{% url 'restaurants:booking_status' booking.id 'complete' %}">{% csrf_token %}<button class="btn-row" type="submit">Completed</button></form>
-          <a class="btn-row inline-block no-underline" href="{% url 'restaurants:booking_detail' booking.id %}">Details</a>
+<section class="receipt dashboard-receipt">
+  <header class="dashboard-toolbar">
+    <div class="dashboard-toolbar-inner">
+      <div class="dashboard-toolbar-setup">
+        <p class="dashboard-toolbar-label">Edit setup</p>
+        <div class="dashboard-toolbar-links">
+          {% for s in onboarding_sidebar_steps %}
+          <a
+            class="btn-row shrink-0 px-3 py-2 text-[10px] no-underline"
+            href="{% url 'restaurants:edit_onboarding_step' step=s.num %}"
+          >Step {{ s.num }} · {{ s.title }}</a>
+          {% endfor %}
         </div>
       </div>
-      {% empty %}
-      <p class="text-seated-ink-light">No bookings today.</p>
-      {% endfor %}
+      <div class="dashboard-toolbar-actions">
+        {% if restaurant.subscription_active and not restaurant.booking_link_published %}
+        <form method="post" action="{% url 'restaurants:publish_booking_link' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn-primary">Publish booking link</button>
+        </form>
+        {% elif restaurant.subscription_active and restaurant.booking_link_published %}
+        <a
+          class="btn-row inline-flex h-11 items-center px-4 text-[10px] no-underline"
+          href="{{ restaurant.get_booking_url }}"
+        >View booking page</a>
+        {% endif %}
+      </div>
     </div>
-    <a href="/book/{{ restaurant.slug }}/" class="btn-primary mt-6 inline-block">+ Add booking</a>
+  </header>
+  <div class="dashboard-shell">
+    <aside class="dashboard-sidebar">
+      <p class="text-[13px] font-bold tracking-[0.12em] text-seated-ink">seated<span class="text-seated-blue-mid">.</span></p>
+      <p class="mt-1 text-xs text-seated-ink-light">{{ restaurant.name }}</p>
+
+      <div class="mt-8 sm:mt-10">
+        <p class="text-2xl font-bold leading-none text-seated-ink">{{ booking_date|date:"j F Y" }}</p>
+        <p class="mt-2 text-[13px] text-seated-ink-mid">{{ booking_date|date:"l" }}</p>
+      </div>
+
+      <nav class="mt-4 flex gap-2" aria-label="Change date">
+        <a
+          href="{% url 'restaurants:dashboard' %}?date={{ prev_date|date:'Y-m-d' }}"
+          class="dashboard-date-nav-btn"
+          title="Previous day"
+        ><span aria-hidden="true">←</span></a>
+        {% if not is_dashboard_today %}
+        <a href="{% url 'restaurants:dashboard' %}" class="dashboard-date-nav-btn text-[11px] font-bold uppercase tracking-navlink text-seated-ink" title="Jump to today">Today</a>
+        {% endif %}
+        <a
+          href="{% url 'restaurants:dashboard' %}?date={{ next_date|date:'Y-m-d' }}"
+          class="dashboard-date-nav-btn"
+          title="Next day"
+        ><span aria-hidden="true">→</span></a>
+      </nav>
+
+      <div class="mt-10 divide-y divide-seated-rule border-t border-seated-rule pt-8">
+        <div class="py-6 first:pt-0">
+          <p class="font-mono text-3xl font-bold leading-none text-seated-ink">{{ stat_booking_count }}</p>
+          <p class="mt-2 text-xs font-normal text-seated-ink-mid">{% if is_dashboard_today %}Bookings today{% else %}Bookings{% endif %}</p>
+          <p class="mt-1 text-[10px] text-seated-ink-light">Excludes cancelled.</p>
+        </div>
+        <div class="py-6">
+          <p class="font-mono text-3xl font-bold leading-none text-seated-ink">{{ stat_covers_confirmed }}</p>
+          <p class="mt-2 text-xs font-normal text-seated-ink-mid">Covers confirmed</p>
+        </div>
+        <div class="py-6 pb-0">
+          <p class="font-mono text-3xl font-bold leading-none text-seated-ink">{{ stat_no_show_count }}</p>
+          <p class="mt-2 text-xs font-normal text-seated-ink-mid">No-shows</p>
+        </div>
+      </div>
+    </aside>
+
+    <div class="dashboard-main">
+      <div class="flex flex-col gap-4 border-b border-seated-rule pb-6 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 class="text-xl font-bold text-seated-ink">
+            {% if is_dashboard_today %}Today’s bookings{% else %}Bookings{% endif %}
+          </h1>
+          {% if not is_dashboard_today %}
+          <p class="mt-1 text-xs uppercase tracking-section text-seated-ink-light">{{ booking_date|date:"l j F Y" }}</p>
+          {% endif %}
+        </div>
+        <a
+          href="/book/{{ restaurant.slug }}/"
+          class="inline-flex h-11 shrink-0 items-center justify-center border-2 border-seated-ink px-5 text-[11px] font-bold uppercase tracking-navlink text-seated-ink no-underline transition-colors hover:bg-seated-cream focus:outline-none focus:ring-2 focus:ring-seated-blue focus:ring-offset-2"
+        >+ Add booking</a>
+      </div>
+
+      <div class="mt-8">
+        {% for group in booking_groups %}
+          {% if group.bookings %}
+          <section class="mb-10 last:mb-0">
+            <p class="mb-3 text-[10px] font-bold uppercase tracking-section text-seated-ink-light">
+              {% if group.service %}{{ group.service.name|upper }} SERVICE{% else %}UNSCHEDULED SERVICE{% endif %}
+            </p>
+            <div class="-mx-1 overflow-x-auto">
+              <table class="dashboard-booking-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Time</th>
+                    <th scope="col">Guest</th>
+                    <th scope="col">Party &amp; table</th>
+                    <th scope="col">Status</th>
+                    <th scope="col"><span class="sr-only">Actions</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for booking in group.bookings %}
+                  <tr>
+                    <td class="whitespace-nowrap font-bold text-seated-ink">{{ booking.time|time:"H:i" }}</td>
+                    <td class="max-w-[12rem] sm:max-w-none">
+                      <p class="font-bold text-seated-ink">{{ booking.guest_name }}</p>
+                      <p class="mt-1 text-[11px] text-seated-ink-light">
+                        #{{ booking.pk }}{% if booking.guest_phone %} · {{ booking.guest_phone }}{% endif %}
+                      </p>
+                    </td>
+                    <td class="whitespace-nowrap text-sm text-seated-ink-mid">{{ booking.party_size }}p · {% if booking.table %}{{ booking.table.label }}{% else %}Unassigned{% endif %}</td>
+                    <td>
+                      {% if booking.status == 'confirmed' %}
+                      <span class="dashboard-tag dashboard-tag-confirmed">Confirmed</span>
+                      {% elif booking.status == 'cancelled' %}
+                      <span class="dashboard-tag dashboard-tag-cancelled">Cancelled</span>
+                      {% elif booking.status == 'no_show' %}
+                      <span class="dashboard-tag dashboard-tag-noshow">No-show</span>
+                      {% elif booking.status == 'completed' %}
+                      <span class="dashboard-tag dashboard-tag-complete">Completed</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if booking.status == 'confirmed' %}
+                      <div class="dashboard-row-actions flex flex-wrap justify-end gap-1.5">
+                        <form method="post" action="{% url 'restaurants:booking_status' booking.id 'no_show' %}" class="inline">
+                          {% csrf_token %}
+                          <input type="hidden" name="dashboard_date" value="{{ dashboard_date_param }}">
+                          <button type="submit" class="btn-row text-[10px]">No-show</button>
+                        </form>
+                        <form method="post" action="{% url 'restaurants:booking_status' booking.id 'cancel' %}" class="inline">
+                          {% csrf_token %}
+                          <input type="hidden" name="dashboard_date" value="{{ dashboard_date_param }}">
+                          <button type="submit" class="btn-row text-[10px]">Cancel</button>
+                        </form>
+                        <form method="post" action="{% url 'restaurants:booking_status' booking.id 'complete' %}" class="inline">
+                          {% csrf_token %}
+                          <input type="hidden" name="dashboard_date" value="{{ dashboard_date_param }}">
+                          <button type="submit" class="btn-row text-[10px]">Done</button>
+                        </form>
+                        <a class="btn-row inline-block text-[10px] no-underline" href="{% url 'restaurants:booking_detail' booking.id %}">Details</a>
+                      </div>
+                      {% elif booking.status == 'cancelled' or booking.status == 'no_show' or booking.status == 'completed' %}
+                      <div class="flex justify-end gap-2">
+                        <form method="post" action="{% url 'restaurants:booking_status' booking.id 'confirm' %}" class="inline">
+                          {% csrf_token %}
+                          <input type="hidden" name="dashboard_date" value="{{ dashboard_date_param }}">
+                          <button type="submit" class="btn-row text-[10px]">Restore</button>
+                        </form>
+                        <a class="btn-row inline-block text-[10px] no-underline" href="{% url 'restaurants:booking_detail' booking.id %}">Details</a>
+                      </div>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+          {% endif %}
+        {% endfor %}
+        {% if not bookings %}
+        <p class="text-sm text-seated-ink-light">No bookings for this day.</p>
+        {% endif %}
+      </div>
+    </div>
   </div>
 </section>
 {% endblock %}

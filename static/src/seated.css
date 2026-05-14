@@ -113,6 +113,74 @@
   .receipt-cream {
     @apply bg-seated-cream;
   }
+  /* Restaurant day dashboard — sidebar + ledger */
+  .receipt.dashboard-receipt {
+    @apply my-8 max-w-[1100px];
+  }
+  body.page-dashboard-full .receipt.dashboard-receipt {
+    @apply mx-0 mb-0 mt-0 max-w-none w-full rounded-none border-0 bg-transparent shadow-none;
+  }
+  .dashboard-toolbar {
+    @apply border-b-2 border-seated-ink bg-seated-paper;
+  }
+  .dashboard-toolbar-inner {
+    @apply flex max-w-none flex-col gap-4 px-4 py-4 sm:flex-row sm:flex-wrap sm:items-start sm:gap-x-4 md:items-center md:px-14 md:py-5;
+  }
+  .dashboard-toolbar-setup {
+    @apply flex min-w-0 flex-1 flex-col gap-3 md:flex-row md:flex-wrap md:items-center;
+  }
+  .dashboard-toolbar-label {
+    @apply shrink-0 font-mono text-[10px] font-bold uppercase tracking-section text-seated-ink-light;
+  }
+  .dashboard-toolbar-links {
+    @apply flex min-w-0 flex-wrap gap-2;
+  }
+  .dashboard-toolbar-actions {
+    @apply flex shrink-0 flex-wrap items-center gap-2 md:ml-auto;
+  }
+  body.page-dashboard-full .dashboard-shell {
+    /* Flex avoids grid min-width quirks; sidebar + ledger from ~640px up */
+    @apply flex min-h-[min(480px,72vh)] flex-col sm:flex-row sm:items-stretch;
+  }
+  .dashboard-sidebar {
+    @apply border-b border-seated-rule bg-seated-paper-warm px-5 py-7 sm:w-[272px] sm:max-w-[36vw] sm:shrink-0 sm:border-b-0 sm:border-r sm:border-seated-rule sm:py-10;
+  }
+  .dashboard-main {
+    @apply min-w-0 flex-1 bg-seated-paper px-5 py-8 sm:px-8 sm:py-10;
+  }
+  .dashboard-date-nav-btn {
+    @apply inline-flex size-11 shrink-0 items-center justify-center border border-seated-rule-dark bg-white font-mono text-seated-ink no-underline transition-colors hover:border-seated-ink hover:bg-seated-cream focus:outline-none focus:ring-2 focus:ring-seated-blue focus:ring-offset-2;
+  }
+  .dashboard-booking-table {
+    @apply w-full min-w-[32rem] border-collapse text-left text-sm;
+  }
+  .dashboard-booking-table thead tr {
+    @apply border-b border-seated-rule;
+  }
+  .dashboard-booking-table th {
+    @apply pb-3 pt-1 text-[10px] font-bold uppercase tracking-section text-seated-ink-light;
+  }
+  .dashboard-booking-table td {
+    @apply align-top py-3.5 text-seated-ink;
+  }
+  .dashboard-booking-table tbody tr {
+    @apply border-b border-seated-rule last:border-b-0;
+  }
+  .dashboard-tag {
+    @apply inline-block whitespace-nowrap rounded-full px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-navlink;
+  }
+  .dashboard-tag-confirmed {
+    @apply bg-seated-blue-pale text-seated-blue;
+  }
+  .dashboard-tag-cancelled {
+    @apply bg-seated-rule/30 text-seated-ink-light;
+  }
+  .dashboard-tag-noshow {
+    @apply border border-seated-rule-dark bg-seated-cream text-seated-ink-mid;
+  }
+  .dashboard-tag-complete {
+    @apply bg-seated-paper-warm text-seated-ink-mid;
+  }
   .tear {
     @apply relative border-t-2 border-dashed border-seated-rule-dark;
   }

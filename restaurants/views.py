@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from datetime import timedelta
 
 import stripe
@@ -7,12 +8,14 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_POST
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import DetailView, TemplateView, UpdateView
 
 from bookings.services import invalidate_slots_cache
 from bookings.models import Booking
+from accounts.views import ONBOARDING_SIDEBAR_STEPS
 from restaurants.forms import BookingDashboardForm, ClosedDateForm, RestaurantForm, ServiceForm, TableForm
 from restaurants.models import ClosedDate, Restaurant, Service, Table
 
@@ -24,27 +27,66 @@ class OwnerRequiredMixin(LoginRequiredMixin):
         return get_object_or_404(Restaurant, owner=self.request.user)
 
 
+def _booking_groups_for_day(bookings):
+    """Preserve first-seen service order while grouping by service."""
+    groups = OrderedDict()
+    for booking in bookings:
+        sid = booking.service_id if booking.service_id else 0
+        if sid not in groups:
+            groups[sid] = {"service": booking.service, "bookings": []}
+        groups[sid]["bookings"].append(booking)
+    return list(groups.values())
+
+
 class DashboardTodayView(OwnerRequiredMixin, TemplateView):
     template_name = "restaurants/dashboard_today.html"
+
+    def _parse_dashboard_date(self):
+        raw = self.request.GET.get("date")
+        fallback = timezone.localdate()
+        if not raw:
+            return fallback
+        parsed = parse_date(raw)
+        return parsed if parsed else fallback
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         restaurant = self.get_restaurant()
+        booking_date = self._parse_dashboard_date()
         today = timezone.localdate()
-        bookings = (
-            Booking.objects.filter(restaurant=restaurant, date=today)
+        bookings = list(
+            Booking.objects.filter(restaurant=restaurant, date=booking_date)
             .select_related("table", "service")
             .prefetch_related("combined_tables")
             .order_by("time")
         )
-        services = Service.objects.filter(restaurant=restaurant, is_active=True)
-        summaries = []
-        for service in services:
-            service_bookings = [b for b in bookings if b.service_id == service.id and b.status == Booking.STATUS_CONFIRMED]
-            booked = sum(b.party_size for b in service_bookings)
-            capacity = sum(t.seats for t in restaurant.tables.all())
-            summaries.append({"service": service, "booked": booked, "capacity": capacity, "remaining": max(capacity - booked, 0)})
-        context.update({"restaurant": restaurant, "today": today, "bookings": bookings, "summaries": summaries})
+
+        booking_count = sum(
+            1 for b in bookings if b.status not in (Booking.STATUS_CANCELLED,)
+        )
+        covers_confirmed = sum(
+            b.party_size for b in bookings if b.status == Booking.STATUS_CONFIRMED
+        )
+        no_show_count = sum(1 for b in bookings if b.status == Booking.STATUS_NO_SHOW)
+
+        qs_date = booking_date.strftime("%Y-%m-%d")
+        context.update(
+            {
+                "restaurant": restaurant,
+                "today": today,
+                "booking_date": booking_date,
+                "dashboard_date_param": qs_date,
+                "is_dashboard_today": booking_date == today,
+                "prev_date": booking_date - timedelta(days=1),
+                "next_date": booking_date + timedelta(days=1),
+                "bookings": bookings,
+                "booking_groups": _booking_groups_for_day(bookings),
+                "stat_booking_count": booking_count,
+                "stat_covers_confirmed": covers_confirmed,
+                "stat_no_show_count": no_show_count,
+                "onboarding_sidebar_steps": ONBOARDING_SIDEBAR_STEPS,
+            }
+        )
         return context
 
 
@@ -175,7 +217,9 @@ def update_booking_status(request, pk, status):
         booking.status = allowed[status]
         booking.save(update_fields=["status", "updated_at"])
         invalidate_slots_cache(restaurant.slug)
-    return redirect("restaurants:dashboard")
+    rd = parse_date(request.POST.get("dashboard_date") or "")
+    qs = f"?date={rd.strftime('%Y-%m-%d')}" if rd else ""
+    return redirect(f"{reverse('restaurants:dashboard')}{qs}")
 
 
 @login_required
@@ -187,6 +231,23 @@ def publish_booking_link(request):
     invalidate_slots_cache(restaurant.slug)
     messages.success(request, "Your booking link is live — guests can book online.")
     return redirect("restaurants:dashboard")
+
+
+@login_required
+def edit_onboarding_step(request, step: int):
+    if step not in (1, 2, 3, 4):
+        return redirect("restaurants:dashboard")
+    restaurant = get_object_or_404(Restaurant, owner=request.user)
+    from accounts.onboarding_session import apply_onboarding_session_from_restaurant
+
+    apply_onboarding_session_from_restaurant(request, restaurant)
+    url_names = {
+        1: "accounts:onboarding_step1",
+        2: "accounts:onboarding_step2",
+        3: "accounts:onboarding_step3",
+        4: "accounts:onboarding_step4",
+    }
+    return redirect(url_names[step])
 
 
 @login_required

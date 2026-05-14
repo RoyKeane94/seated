@@ -1,10 +1,11 @@
-from datetime import date, time
+from datetime import date, timedelta, time
 
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from bookings.models import Booking
+from accounts.onboarding_session import build_onboarding_session_payload
 from restaurants.models import Restaurant, Service, Table
 
 
@@ -54,6 +55,22 @@ class DashboardAccessTests(TestCase):
         self.client.login(username="dash@test.com", password="pass")
         response = self.client.get(reverse("restaurants:dashboard"))
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("restaurants:edit_onboarding_step", kwargs={"step": 1}))
+
+    def test_dashboard_shows_publish_in_toolbar_when_unpublished(self):
+        self.restaurant.subscription_active = True
+        self.restaurant.booking_link_published = False
+        self.restaurant.save()
+        self.client.login(username="dash@test.com", password="pass")
+        response = self.client.get(reverse("restaurants:dashboard"))
+        self.assertContains(response, "Publish booking link")
+
+    def test_dashboard_accepts_valid_date_query(self):
+        self.client.login(username="dash@test.com", password="pass")
+        d = date.today() - timedelta(days=1)
+        response = self.client.get(f"{reverse('restaurants:dashboard')}?date={d.isoformat()}")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, d.strftime("%A"))
 
     def test_publish_booking_link_sets_published(self):
         self.client.login(username="dash@test.com", password="pass")
@@ -151,3 +168,64 @@ class DashboardOwnershipTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.booking.refresh_from_db()
         self.assertEqual(self.booking.status, Booking.STATUS_COMPLETED)
+
+    def test_booking_status_redirect_preserves_dashboard_date(self):
+        self.client.login(username="owner@test.com", password="pass")
+        d = date.today().isoformat()
+        response = self.client.post(
+            reverse("restaurants:booking_status", kwargs={"pk": self.booking.pk, "status": "complete"}),
+            {"dashboard_date": d},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(f"date={d}", response.url)
+
+    def test_edit_onboarding_step_seeds_session(self):
+        self.client.login(username="owner@test.com", password="pass")
+        response = self.client.get(reverse("restaurants:edit_onboarding_step", kwargs={"step": 3}))
+        self.assertRedirects(
+            response,
+            reverse("accounts:onboarding_step3"),
+            status_code=302,
+            fetch_redirect_response=False,
+        )
+        data = dict(self.client.session.get("onboarding", {}))
+        self.assertEqual(data["restaurant"]["name"], "Chez")
+        self.assertEqual(len(data["tables"]), 1)
+        self.assertEqual(data["tables"][0]["label"], "T1")
+        self.assertEqual(len(data["services"]), 1)
+        self.assertEqual(data["services"][0]["name"], "Dinner")
+
+
+class OnboardingHydratePayloadTests(TestCase):
+    def test_build_payload_matches_live_models(self):
+        owner = User.objects.create_user("hydrate@test.com", "hydrate@test.com", "pass")
+        r = Restaurant.objects.create(
+            owner=owner,
+            name="Test R",
+            slug="test-r",
+            address_line1="1 High St",
+            postcode="XY1",
+            phone="07700",
+            email="t@example.org",
+            plan=Restaurant.PLAN_LINK,
+            max_party_size=12,
+        )
+        t1 = Table.objects.create(restaurant=r, label="A", seats=2, is_combinable=True)
+        t2 = Table.objects.create(restaurant=r, label="B", seats=4, is_combinable=True)
+        t1.combine_with.add(t2)
+        Service.objects.create(
+            restaurant=r,
+            name="Lunch",
+            days_of_week=[1, 2],
+            start_time=time(12, 0),
+            end_time=time(14, 0),
+            turn_time_minutes=60,
+        )
+        payload = build_onboarding_session_payload(r)
+        self.assertEqual(payload["plan"], Restaurant.PLAN_LINK)
+        self.assertEqual(payload["max_party_size"], 12)
+        self.assertEqual(payload["restaurant"]["name"], "Test R")
+        self.assertEqual(len(payload["tables"]), 2)
+        row = next(row for row in payload["tables"] if row["local_id"] == "t1")
+        self.assertIn("t2", row["combine_with"])
+        self.assertEqual(payload["services"][0]["start_time"], "12:00")

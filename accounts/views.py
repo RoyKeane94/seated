@@ -93,6 +93,12 @@ def onboarding_step1(request):
             request.session["onboarding"] = data
             return redirect("accounts:onboarding_step2")
     else:
+        r = data.get("restaurant")
+        if isinstance(r, dict):
+            for key in ("name", "address_line1", "postcode", "phone", "email"):
+                if key in r:
+                    val = r[key]
+                    initial[key] = "" if val is None else val
         form = OnboardingRestaurantForm(initial=initial)
     return render(
         request,
